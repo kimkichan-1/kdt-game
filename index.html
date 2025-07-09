@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>격투 게임</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #container { width: 100vw; height: 100vh; }
+    #instructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="instructions">
+    <h2>격투 게임</h2>
+    <p>WASD: 이동</p>
+    <p>Shift: 달리기</p>
+    <p>K: 점프</p>
+    <p>L: 구르기</p>
+    <!--<p>B: 충돌 박스 표시/숨기기</p>-->
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
