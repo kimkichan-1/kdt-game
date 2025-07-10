@@ -1,1 +1,1 @@
-fix: Display room ID correctly on screen
+Refactor: Adjust room ID display in index.html
