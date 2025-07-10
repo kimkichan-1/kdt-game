@@ -8,7 +8,14 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
-const rooms = {}; // { roomId: { players: [], gameState: {} } }
+const rooms = {}; // { roomId: { players: [{ id: socket.id, ready: false }], gameState: {} } }
+
+// Helper function to update all players in a room
+function updateRoomPlayers(roomId) {
+  if (rooms[roomId]) {
+    io.to(roomId).emit('updatePlayers', rooms[roomId].players);
+  }
+}
 
 // 정적 파일 서빙을 위한 디렉토리 설정
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,25 +29,45 @@ io.on('connection', (socket) => {
 
   socket.on('createRoom', () => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    rooms[roomId] = { players: [], gameState: {} };
+    rooms[roomId] = { players: [{ id: socket.id, ready: false }], gameState: {} };
     socket.join(roomId);
-    rooms[roomId].players.push(socket.id);
     socket.roomId = roomId; // Store roomId on socket for easy access
     console.log(`Room created: ${roomId} by ${socket.id}`);
     socket.emit('roomCreated', roomId);
+    updateRoomPlayers(roomId);
   });
 
   socket.on('joinRoom', (roomId) => {
     if (rooms[roomId]) {
+      // Check if player is already in the room
+      if (rooms[roomId].players.some(p => p.id === socket.id)) {
+        socket.emit('roomError', 'Already in this room');
+        return;
+      }
       socket.join(roomId);
-      rooms[roomId].players.push(socket.id);
+      rooms[roomId].players.push({ id: socket.id, ready: false });
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', roomId);
-      // Notify others in the room that a new player joined
-      socket.to(roomId).emit('playerJoined', socket.id);
+      updateRoomPlayers(roomId);
     } else {
       socket.emit('roomError', 'Room not found');
+    }
+  });
+
+  socket.on('ready', () => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const playerIndex = rooms[socket.roomId].players.findIndex(p => p.id === socket.id);
+      if (playerIndex !== -1) {
+        rooms[socket.roomId].players[playerIndex].ready = !rooms[socket.roomId].players[playerIndex].ready;
+        updateRoomPlayers(socket.roomId);
+
+        // Check if all players are ready
+        const allReady = rooms[socket.roomId].players.every(p => p.ready);
+        if (allReady && rooms[socket.roomId].players.length > 0) {
+          io.to(socket.roomId).emit('startGame');
+        }
+      }
     }
   });
 
@@ -55,14 +82,13 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
     if (socket.roomId && rooms[socket.roomId]) {
       rooms[socket.roomId].players = rooms[socket.roomId].players.filter(
-        (id) => id !== socket.id
+        (p) => p.id !== socket.id
       );
       if (rooms[socket.roomId].players.length === 0) {
         delete rooms[socket.roomId]; // Delete room if no players left
         console.log(`Room ${socket.roomId} deleted.`);
       } else {
-        // Notify others in the room that a player left
-        socket.to(socket.roomId).emit('playerLeft', socket.id);
+        updateRoomPlayers(socket.roomId);
       }
     }
   });

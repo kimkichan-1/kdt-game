@@ -1,1 +1,1 @@
-fix: Resolve player and NPC initialization order and remove unnecessary bind
+feat: Implement waiting room and join room popup

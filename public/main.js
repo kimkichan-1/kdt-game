@@ -208,13 +208,24 @@ export class GameStage3 {
 const menu = document.getElementById('menu');
 const controls = document.getElementById('controls');
 const createRoomButton = document.getElementById('createRoomButton');
-const joinRoomMainButton = document.getElementById('joinRoomMainButton'); // Updated ID
+const joinRoomMainButton = document.getElementById('joinRoomMainButton');
 const joinRoomPopup = document.getElementById('joinRoomPopup');
 const popupRoomIdInput = document.getElementById('popupRoomIdInput');
 const popupJoinButton = document.getElementById('popupJoinButton');
 const popupCloseButton = document.getElementById('popupCloseButton');
 const waitingRoom = document.getElementById('waitingRoom');
 const waitingRoomIdDisplay = document.getElementById('waitingRoomIdDisplay');
+const playerList = document.getElementById('playerList');
+const readyButton = document.getElementById('readyButton');
+
+function updatePlayers(players) {
+  playerList.innerHTML = '';
+  players.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = `Player ${p.id.substring(0, 4)} ${p.ready ? '(준비)' : '(대기)'}`;
+    playerList.appendChild(li);
+  });
+}
 
 createRoomButton.addEventListener('click', () => {
   menu.style.display = 'none';
@@ -243,19 +254,30 @@ popupCloseButton.addEventListener('click', () => {
   joinRoomPopup.style.display = 'none'; // Hide popup
 });
 
+readyButton.addEventListener('click', () => {
+  socket.emit('ready');
+});
+
 socket.on('roomCreated', (roomId) => {
   waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
   // Game starts when another player joins or after a specific event
   // For now, let's assume game starts immediately for the creator
-  menu.style.display = 'none';
-  waitingRoom.style.display = 'none';
-  controls.style.display = 'block';
-  new GameStage3(socket);
+  // menu.style.display = 'none'; // Already hidden
+  // waitingRoom.style.display = 'flex'; // Already shown
 });
 
 socket.on('roomJoined', (roomId) => {
+  waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
   // Hide waiting room and show game controls
-  menu.style.display = 'none';
+  // menu.style.display = 'none'; // Already hidden
+  // waitingRoom.style.display = 'flex'; // Already shown
+});
+
+socket.on('updatePlayers', (players) => {
+  updatePlayers(players);
+});
+
+socket.on('startGame', () => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
   new GameStage3(socket);
