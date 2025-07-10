@@ -5,29 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>격투 게임</title>
   <style>
-    body { margin: 0; overflow: hidden; }
-    #container { width: 100vw; height: 100vh; }
-    #instructions {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px;
-      font-family: Arial, sans-serif;
-    }
-  </style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333333;
+    background-image: url('mainimage.png');
+    background-size: 1540px auto;
+    background-position: center 0px;
+    background-repeat: no-repeat;
+  }
+  #menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 수직 중앙 정렬 */
+  align-items: center;     /* 수평 중앙 정렬 */
+  z-index: 10;
+  }
+  #menu h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #fffb02;
+  }
+  #startButton {
+    padding: 15px 30px;
+    font-size: 24px;
+    background-color: #d97d3d;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+  #startButton:hover {
+    background-color: #b86b34;
+    transform: scale(1.05);
+  }
+  #controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #d97d3d;
+  }
+  #container {
+    width: 100%;
+    height: 100%;
+  }
+</style>
 </head>
 <body>
-  <div id="container"></div>
-  <div id="instructions">
-    <h2>격투 게임</h2>
+  <div id="menu">
+    <h1>격투 게임</h1>
+    <button id="startButton">게임 시작</button>
+  </div>
+  <div id="controls" style="display: none;">
     <p>WASD: 이동</p>
     <p>Shift: 달리기</p>
     <p>K: 점프</p>
     <p>L: 구르기</p>
-    <!--<p>B: 충돌 박스 표시/숨기기</p>-->
   </div>
-  <script type="module" src="main.js"></script>
+  <div id="container"></div>
+
+  <script type="module">
+    import { GameStage3 } from './main.js';
+
+    const menu = document.getElementById('menu');
+    const controls = document.getElementById('controls');
+    const startButton = document.getElementById('startButton');
+
+    startButton.addEventListener('click', () => {
+      menu.style.display = 'none';
+      controls.style.display = 'block';
+      new GameStage3();
+    });
+  </script>
 </body>
 </html>

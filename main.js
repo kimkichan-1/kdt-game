@@ -1,11 +1,10 @@
-// main.js
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js';
 import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 
-class GameStage3 {
+export class GameStage3 {
   constructor() {
     this.Initialize();
     this.RAF();
@@ -115,7 +114,7 @@ class GameStage3 {
   CreatePlayer() {
     this.player_ = new player.Player({
       scene: this.scene,
-      onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible), // 디버그 토글 콜백
+      onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
     });
 
     const npcPos = new THREE.Vector3(0, 0, -4);
@@ -164,8 +163,3 @@ class GameStage3 {
     this.renderer.render(this.scene, this.camera);
   }
 }
-
-let game = null;
-window.addEventListener('DOMContentLoaded', () => {
-  game = new GameStage3();
-});
