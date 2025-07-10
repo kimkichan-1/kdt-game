@@ -1,1 +1,1 @@
-fix: Resolve player and NPC initialization order in main.js
+fix: Resolve player and NPC initialization order and remove unnecessary bind

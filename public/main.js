@@ -208,37 +208,62 @@ export class GameStage3 {
 const menu = document.getElementById('menu');
 const controls = document.getElementById('controls');
 const createRoomButton = document.getElementById('createRoomButton');
-const joinRoomButton = document.getElementById('joinRoomButton');
-const roomIdInput = document.getElementById('roomIdInput');
-const roomIdDisplay = document.getElementById('roomIdDisplay');
+const joinRoomMainButton = document.getElementById('joinRoomMainButton'); // Updated ID
+const joinRoomPopup = document.getElementById('joinRoomPopup');
+const popupRoomIdInput = document.getElementById('popupRoomIdInput');
+const popupJoinButton = document.getElementById('popupJoinButton');
+const popupCloseButton = document.getElementById('popupCloseButton');
+const waitingRoom = document.getElementById('waitingRoom');
+const waitingRoomIdDisplay = document.getElementById('waitingRoomIdDisplay');
 
 createRoomButton.addEventListener('click', () => {
+  menu.style.display = 'none';
+  waitingRoom.style.display = 'flex'; // Show waiting room
   socket.emit('createRoom');
 });
 
-joinRoomButton.addEventListener('click', () => {
-  const roomId = roomIdInput.value.trim();
+joinRoomMainButton.addEventListener('click', () => {
+  joinRoomPopup.style.display = 'flex'; // Show popup
+});
+
+popupJoinButton.addEventListener('click', () => {
+  const roomId = popupRoomIdInput.value.trim();
   if (roomId) {
     socket.emit('joinRoom', roomId);
+    joinRoomPopup.style.display = 'none'; // Hide popup after joining
+    menu.style.display = 'none';
+    waitingRoom.style.display = 'flex'; // Show waiting room while waiting for join confirmation
+    waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
   } else {
     alert('방 ID를 입력해주세요.');
   }
 });
 
+popupCloseButton.addEventListener('click', () => {
+  joinRoomPopup.style.display = 'none'; // Hide popup
+});
+
 socket.on('roomCreated', (roomId) => {
-  roomIdDisplay.textContent = `방 ID: ${roomId}`; // Display the room ID
+  waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
+  // Game starts when another player joins or after a specific event
+  // For now, let's assume game starts immediately for the creator
   menu.style.display = 'none';
+  waitingRoom.style.display = 'none';
   controls.style.display = 'block';
   new GameStage3(socket);
 });
 
 socket.on('roomJoined', (roomId) => {
-  roomIdDisplay.textContent = `방 ID: ${roomId}`; // Display the room ID
+  // Hide waiting room and show game controls
   menu.style.display = 'none';
+  waitingRoom.style.display = 'none';
   controls.style.display = 'block';
   new GameStage3(socket);
 });
 
 socket.on('roomError', (message) => {
   alert(`방 오류: ${message}`);
+  menu.style.display = 'flex'; // Show menu again on error
+  waitingRoom.style.display = 'none';
+  joinRoomPopup.style.display = 'none';
 });
