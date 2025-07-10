@@ -1,1 +1,1 @@
-feat: Add multiplayer functionality with Socket.IO
+fix: Display room ID correctly on screen
