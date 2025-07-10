@@ -1,1 +1,1 @@
-Refactor: Adjust room ID display in index.html
+fix: Resolve player and NPC initialization order in main.js

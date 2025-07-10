@@ -18,23 +18,23 @@
     background-repeat: no-repeat;
   }
   #menu {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* 수직 중앙 정렬 */
-  align-items: center;     /* 수평 중앙 정렬 */
-  z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 수직 중앙 정렬 */
+    align-items: center;     /* 수평 중앙 정렬 */
+    z-index: 10;
   }
   #menu h1 {
     font-size: 48px;
     margin-bottom: 20px;
     color: #fffb02;
   }
-  #startButton {
+  #createRoomButton, #joinRoomMainButton, #popupJoinButton, #popupCloseButton {
     padding: 15px 30px;
     font-size: 24px;
     background-color: #d97d3d;
@@ -44,8 +44,9 @@
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    margin: 5px; /* Added margin for spacing */
   }
-  #startButton:hover {
+  #createRoomButton:hover, #joinRoomMainButton:hover, #popupJoinButton:hover, #popupCloseButton:hover {
     background-color: #b86b34;
     transform: scale(1.05);
   }
@@ -58,28 +59,98 @@
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #d97d3d;
+    display: none; /* Hidden by default */
   }
   #container {
     width: 100%;
     height: 100%;
   }
-</style>
+
+  /* Popup styles */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .popup-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    color: #333;
+  }
+  .popup-content input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 200px;
+  }
+
+  /* Waiting Room styles */
+  #waitingRoom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 50; /* Between menu and game */
+    display: none; /* Hidden by default */
+  }
+  #waitingRoom h2 {
+    font-size: 36px;
+    margin-bottom: 15px;
+  }
+  #waitingRoomIdDisplay {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fffb02;
+    margin-bottom: 10px;
+  }
+  </style>
 </head>
 <body>
   <div id="menu">
     <h1>격투 게임</h1>
     <button id="createRoomButton">방 생성</button>
-    <div style="margin-top: 10px;">
-      <input type="text" id="roomIdInput" placeholder="방 ID 입력">
-      <button id="joinRoomButton">방 참가</button>
+    <button id="joinRoomMainButton">방 참가</button>
+  </div>
+
+  <!-- Join Room Popup -->
+  <div id="joinRoomPopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <h2>방 참가</h2>
+      <input type="text" id="popupRoomIdInput" placeholder="방 ID 입력">
+      <button id="popupJoinButton">입장</button>
+      <button id="popupCloseButton">닫기</button>
     </div>
   </div>
+
+  <!-- Waiting Room Display -->
+  <div id="waitingRoom" style="display: none;">
+    <h2>대기 중...</h2>
+    <p id="waitingRoomIdDisplay"></p>
+    <p>다른 플레이어를 기다리는 중입니다.</p>
+  </div>
+
   <div id="controls" style="display: none;">
     <p>WASD: 이동</p>
     <p>Shift: 달리기</p>
     <p>K: 점프</p>
     <p>L: 구르기</p>
-    <p id="roomIdDisplay" style="position: absolute; top: 20px; width: 100%; text-align: center; font-size: 20px; color: #fff; z-index: 11;"></p>
   </div>
   <div id="container"></div>
 
