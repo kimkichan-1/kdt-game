@@ -15,13 +15,13 @@ export const object = (() => {
 
     LoadModels_() {
       const fbxLoader = new FBXLoader();
-      fbxLoader.setPath('./resources/Buildings pack - Aug 2017/FBX/');
+      fbxLoader.setPath('./resources/Buildings-pack-Aug-2017/FBX/');
 
       const gltfLoader = new GLTFLoader();
-      gltfLoader.setPath('./resources/Nature-Kit/Models/GLTF format/');
+      gltfLoader.setPath('./resources/Nature-Kit/Models/GLTF-format/');
 
       const carLoader = new GLTFLoader();
-      carLoader.setPath('./resources/kenney_car-kit/Models/GLB format/');
+      carLoader.setPath('./resources/kenney_car-kit/Models/GLB-format/');
 
       const textureLoader = new THREE.TextureLoader();
 
@@ -939,7 +939,7 @@ export const object = (() => {
 
       if (modelInfo.texture) {
         const texture = textureLoader.load(
-          `./resources/Buildings pack - Aug 2017/Textures/${modelInfo.texture}`
+          `./resources/Buildings-pack-Aug-2017/Textures/${modelInfo.texture}`
         );
         model.traverse((c) => {
           if (c.isMesh) {
