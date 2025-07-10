@@ -926,6 +926,10 @@ export const object = (() => {
           carLoader.load(modelInfo.filename, (gltf) => {
             this.OnModelLoaded_(gltf.scene, modelInfo, textureLoader);
           });
+        } else if (modelInfo.type === 'character') {
+          characterLoader.load(modelInfo.filename, (gltf) => {
+            this.OnModelLoaded_(gltf.scene, modelInfo, textureLoader);
+          });
         }
       });
     }
