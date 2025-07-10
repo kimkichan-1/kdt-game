@@ -119,13 +119,13 @@ export class GameStage3 {
   }
 
   CreateLocalPlayer() {
+    const npcPos = new THREE.Vector3(0, 0, -4);
+    this.npc_ = new object.NPC(this.scene, npcPos);
+
     this.player_ = new player.Player({
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
     });
-
-    const npcPos = new THREE.Vector3(0, 0, -4);
-    this.npc_ = new object.NPC(this.scene, npcPos);
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
     this.rotationAngle = 4.715;
@@ -185,7 +185,7 @@ export class GameStage3 {
     const delta = ((time || performance.now()) - this.prevTime) * 0.001;
     this.prevTime = time || performance.now();
 
-    if (this.player_) {
+    if (this.player_ && this.player_.mesh_) {
       this.player_.Update(delta, this.rotationAngle, this.npc_.GetCollidables());
       this.UpdateCamera();
 
