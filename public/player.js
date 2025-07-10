@@ -36,8 +36,10 @@ export const player = (() => {
       this.rollCooldown_ = 1.0;
       this.rollCooldownTimer_ = 0;
 
-      this.LoadModel_();
-      this.InitInput_();
+      this.LoadModel_(params.color);
+      if (!params.isRemote) {
+        this.InitInput_();
+      }
     }
 
     InitInput_() {
@@ -105,7 +107,7 @@ export const player = (() => {
       }
     }
 
-    LoadModel_() {
+    LoadModel_(color = 0xffffff) {
       const loader = new GLTFLoader();
       loader.setPath('./resources/Ultimate Animated Character Pack - Nov 2019/glTF/');
       loader.load('Knight_Male.gltf', (gltf) => {
@@ -120,7 +122,7 @@ export const player = (() => {
             c.castShadow = true;
             c.receiveShadow = true;
             if (c.material) {
-              c.material.color.offsetHSL(0, 0, 0.25);
+              c.material.color.setHex(color);
             }
           }
         });
@@ -170,6 +172,19 @@ export const player = (() => {
       }
     }
 
+    SetPosition(position) {
+      this.position_.set(position[0], position[1], position[2]);
+      if (this.mesh_) {
+        this.mesh_.position.copy(this.position_);
+      }
+    }
+
+    SetRotation(rotation) {
+      if (this.mesh_) {
+        this.mesh_.rotation.set(rotation[0], rotation[1], rotation[2]);
+      }
+    }
+
     UpdateDebugVisuals() {
       if (this.boundingBoxHelper_) {
         this.boundingBoxHelper_.visible = this.keys_.debug;
@@ -180,6 +195,7 @@ export const player = (() => {
     }
 
     Update(timeElapsed, rotationAngle = 0, collidables = []) {
+      if (this.params_.isRemote) return;
       if (!this.mesh_) return;
 
       this.lastRotationAngle_ = rotationAngle;

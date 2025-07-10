@@ -68,7 +68,12 @@
 <body>
   <div id="menu">
     <h1>격투 게임</h1>
-    <button id="startButton">게임 시작</button>
+    <button id="createRoomButton">방 생성</button>
+    <div style="margin-top: 10px;">
+      <input type="text" id="roomIdInput" placeholder="방 ID 입력">
+      <button id="joinRoomButton">방 참가</button>
+    </div>
+    <p id="roomIdDisplay" style="margin-top: 10px; font-size: 20px; color: #fff;"></p>
   </div>
   <div id="controls" style="display: none;">
     <p>WASD: 이동</p>
@@ -78,18 +83,7 @@
   </div>
   <div id="container"></div>
 
-  <script type="module">
-    import { GameStage3 } from './main.js';
-
-    const menu = document.getElementById('menu');
-    const controls = document.getElementById('controls');
-    const startButton = document.getElementById('startButton');
-
-    startButton.addEventListener('click', () => {
-      menu.style.display = 'none';
-      controls.style.display = 'block';
-      new GameStage3();
-    });
-  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

@@ -4,10 +4,17 @@ import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 
+const socket = io();
+
 export class GameStage3 {
-  constructor() {
+  constructor(socket) {
+    this.socket = socket;
+    this.players = {}; // To store other players' objects
+    this.localPlayerId = socket.id;
+
     this.Initialize();
     this.RAF();
+    this.SetupSocketEvents();
   }
 
   Initialize() {
@@ -33,7 +40,7 @@ export class GameStage3 {
     this.SetupLighting();
     this.SetupSkyAndFog();
     this.CreateGround();
-    this.CreatePlayer();
+    this.CreateLocalPlayer();
 
     window.addEventListener('resize', () => this.OnWindowResize(), false);
   }
@@ -111,7 +118,7 @@ export class GameStage3 {
     this.scene.add(this.ground);
   }
 
-  CreatePlayer() {
+  CreateLocalPlayer() {
     this.player_ = new player.Player({
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
@@ -138,10 +145,37 @@ export class GameStage3 {
     this.camera.lookAt(headPosition);
   }
 
-  OnWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  SetupSocketEvents() {
+    this.socket.on('gameUpdate', (data) => {
+      // Update other players' positions
+      if (data.playerId === this.localPlayerId) return; // Don't update self
+
+      let otherPlayer = this.players[data.playerId];
+      if (!otherPlayer) {
+        // Create a new player object for the new player
+        otherPlayer = new player.Player({
+          scene: this.scene,
+          color: 0x00ff00, // Different color for other players
+        });
+        this.players[data.playerId] = otherPlayer;
+      }
+      otherPlayer.SetPosition(data.position);
+      otherPlayer.SetRotation(data.rotation);
+    });
+
+    this.socket.on('playerJoined', (playerId) => {
+      console.log(`Player ${playerId} joined the room.`);
+      // Optionally, request initial state from the new player
+    });
+
+    this.socket.on('playerLeft', (playerId) => {
+      console.log(`Player ${playerId} left the room.`);
+      const otherPlayer = this.players[playerId];
+      if (otherPlayer) {
+        this.scene.remove(otherPlayer.mesh_);
+        delete this.players[playerId];
+      }
+    });
   }
 
   RAF(time) {
@@ -154,6 +188,13 @@ export class GameStage3 {
     if (this.player_) {
       this.player_.Update(delta, this.rotationAngle, this.npc_.GetCollidables());
       this.UpdateCamera();
+
+      // Send player position to server
+      this.socket.emit('gameUpdate', {
+        playerId: this.localPlayerId,
+        position: this.player_.mesh_.position.toArray(),
+        rotation: this.player_.mesh_.rotation.toArray(),
+      });
     }
 
     if (this.npc_) {
@@ -163,3 +204,41 @@ export class GameStage3 {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
+const menu = document.getElementById('menu');
+const controls = document.getElementById('controls');
+const createRoomButton = document.getElementById('createRoomButton');
+const joinRoomButton = document.getElementById('joinRoomButton');
+const roomIdInput = document.getElementById('roomIdInput');
+const roomIdDisplay = document.getElementById('roomIdDisplay');
+
+createRoomButton.addEventListener('click', () => {
+  socket.emit('createRoom');
+});
+
+joinRoomButton.addEventListener('click', () => {
+  const roomId = roomIdInput.value.trim();
+  if (roomId) {
+    socket.emit('joinRoom', roomId);
+  } else {
+    alert('방 ID를 입력해주세요.');
+  }
+});
+
+socket.on('roomCreated', (roomId) => {
+  roomIdDisplay.textContent = `방 ID: ${roomId}`; // Display the room ID
+  menu.style.display = 'none';
+  controls.style.display = 'block';
+  new GameStage3(socket);
+});
+
+socket.on('roomJoined', (roomId) => {
+  roomIdDisplay.textContent = `방 ID: ${roomId}`; // Display the room ID
+  menu.style.display = 'none';
+  controls.style.display = 'block';
+  new GameStage3(socket);
+});
+
+socket.on('roomError', (message) => {
+  alert(`방 오류: ${message}`);
+});

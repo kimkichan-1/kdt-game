@@ -1,18 +1,73 @@
 const express = require('express');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
+const rooms = {}; // { roomId: { players: [], gameState: {} } }
+
 // 정적 파일 서빙을 위한 디렉토리 설정
-// 현재 프로젝트의 모든 파일이 루트에 있으므로, 'public' 디렉토리로 이동시키거나
-// 아니면 현재 루트 디렉토리를 정적 파일 서빙 경로로 지정해야 합니다.
-// 여기서는 프로젝트의 모든 파일을 'public' 디렉토리로 옮기는 것을 가정합니다.
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  socket.on('createRoom', () => {
+    const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
+    rooms[roomId] = { players: [], gameState: {} };
+    socket.join(roomId);
+    rooms[roomId].players.push(socket.id);
+    socket.roomId = roomId; // Store roomId on socket for easy access
+    console.log(`Room created: ${roomId} by ${socket.id}`);
+    socket.emit('roomCreated', roomId);
+  });
+
+  socket.on('joinRoom', (roomId) => {
+    if (rooms[roomId]) {
+      socket.join(roomId);
+      rooms[roomId].players.push(socket.id);
+      socket.roomId = roomId;
+      console.log(`${socket.id} joined room: ${roomId}`);
+      socket.emit('roomJoined', roomId);
+      // Notify others in the room that a new player joined
+      socket.to(roomId).emit('playerJoined', socket.id);
+    } else {
+      socket.emit('roomError', 'Room not found');
+    }
+  });
+
+  socket.on('gameUpdate', (data) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      // Broadcast game updates to all other clients in the same room
+      socket.to(socket.roomId).emit('gameUpdate', data);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    if (socket.roomId && rooms[socket.roomId]) {
+      rooms[socket.roomId].players = rooms[socket.roomId].players.filter(
+        (id) => id !== socket.id
+      );
+      if (rooms[socket.roomId].players.length === 0) {
+        delete rooms[socket.roomId]; // Delete room if no players left
+        console.log(`Room ${socket.roomId} deleted.`);
+      } else {
+        // Notify others in the room that a player left
+        socket.to(socket.roomId).emit('playerLeft', socket.id);
+      }
+    }
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
