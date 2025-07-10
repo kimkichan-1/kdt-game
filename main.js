@@ -97,7 +97,7 @@ export class GameStage3 {
 
   CreateGround() {
     const textureLoader = new THREE.TextureLoader();
-    const grassTexture = textureLoader.load('resources/Map1.png');
+    const grassTexture = textureLoader.load('./resources/Map1.png');
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;
     grassTexture.repeat.set(1, 1);
