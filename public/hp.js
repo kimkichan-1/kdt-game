@@ -70,19 +70,17 @@ export const hp = (() => {
     }
 
     updatePosition() {
-      if (!this.playerMesh) { // playerMesh가 없으면 업데이트하지 않음
-        return;
-      }
-
-      if (this.headBone) {
+      if (this.playerMesh && this.headBone) {
         const headWorldPosition = new THREE.Vector3();
         this.headBone.getWorldPosition(headWorldPosition);
         this.sprite.position.copy(headWorldPosition).add(this.offset);
-      } else {
+        // console.log(`HPUI Head Y: ${headWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
+      } else if (this.playerMesh) {
         // headBone이 없는 경우를 대비하여 기존 로직 유지 (fallback)
         const playerWorldPosition = new THREE.Vector3();
         this.playerMesh.getWorldPosition(playerWorldPosition);
         this.sprite.position.copy(playerWorldPosition).add(this.offset);
+        // console.log(`HPUI Player Y (fallback): ${playerWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
       }
     }
 
