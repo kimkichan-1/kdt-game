@@ -39,13 +39,9 @@ export const hp = (() => {
       const ctx = this.context;
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Draw background for name and bar
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; // Semi-transparent background
-      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
       // Player Name
       ctx.font = 'bold 24px Arial';
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = 'black';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(this.playerName, this.canvas.width / 2, this.canvas.height / 4);
