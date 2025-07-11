@@ -231,6 +231,7 @@ const waitingRoom = document.getElementById('waitingRoom');
 const waitingRoomIdDisplay = document.getElementById('waitingRoomIdDisplay');
 const playerList = document.getElementById('playerList');
 const readyButton = document.getElementById('readyButton');
+const maxPlayersInput = document.getElementById('maxPlayersInput');
 
 function updatePlayers(players) {
   playerList.innerHTML = '';
@@ -242,9 +243,14 @@ function updatePlayers(players) {
 }
 
 createRoomButton.addEventListener('click', () => {
+  const maxPlayers = parseInt(maxPlayersInput.value, 10);
+  if (isNaN(maxPlayers) || maxPlayers < 2 || maxPlayers > 8) {
+    alert('최대 인원은 2에서 8 사이의 숫자로 설정해주세요.');
+    return;
+  }
   menu.style.display = 'none';
   waitingRoom.style.display = 'flex'; // Show waiting room
-  socket.emit('createRoom');
+  socket.emit('createRoom', maxPlayers);
 });
 
 joinRoomMainButton.addEventListener('click', () => {

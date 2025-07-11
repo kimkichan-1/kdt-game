@@ -9,7 +9,6 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 const rooms = {}; // { roomId: { players: [{ id: socket.id, ready: false }], gameState: {} } }
-const MAX_PLAYERS_PER_ROOM = 2; // 최대 플레이어 수
 
 // Helper function to update all players in a room
 function updateRoomPlayers(roomId) {
@@ -28,12 +27,12 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.on('createRoom', () => {
+  socket.on('createRoom', (maxPlayers) => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    rooms[roomId] = { players: [{ id: socket.id, ready: false, character: 'Knight_Male' }], gameState: {} };
+    rooms[roomId] = { players: [{ id: socket.id, ready: false, character: 'Knight_Male' }], gameState: {}, maxPlayers: maxPlayers };
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access
-    console.log(`Room created: ${roomId} by ${socket.id}`);
+    console.log(`Room created: ${roomId} by ${socket.id} with max players: ${maxPlayers}`);
     socket.emit('roomCreated', roomId);
     updateRoomPlayers(roomId);
   });
@@ -46,7 +45,7 @@ io.on('connection', (socket) => {
         return;
       }
       // Check if room is full
-      if (rooms[roomId].players.length >= MAX_PLAYERS_PER_ROOM) {
+      if (rooms[roomId].players.length >= rooms[roomId].maxPlayers) {
         socket.emit('roomError', 'Room is full');
         return;
       }
