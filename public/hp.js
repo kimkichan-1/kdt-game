@@ -72,6 +72,7 @@ export const hp = (() => {
         const playerWorldPosition = new THREE.Vector3();
         this.playerMesh.getWorldPosition(playerWorldPosition);
         this.sprite.position.copy(playerWorldPosition).add(this.offset);
+        console.log(`HPUI Player Y: ${playerWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 추가
       }
     }
 

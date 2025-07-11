@@ -482,6 +482,8 @@ export const player = (() => {
       if (this.hpUI) {
         this.hpUI.updatePosition();
       }
+
+      console.log(`Player Y: ${this.mesh_.position.y}`); // 디버그 로그 추가
     }
   }
 
