@@ -222,6 +222,10 @@ export const player = (() => {
         if (this.mixer_) {
           this.mixer_.update(timeElapsed);
         }
+        // 원격 플레이어의 HPUI 위치 업데이트
+        if (this.hpUI) {
+          this.hpUI.updatePosition();
+        }
         return;
       }
       if (!this.mesh_) return;
