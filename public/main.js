@@ -44,6 +44,12 @@ export class GameStage3 {
     this.CreateGround();
     this.CreateLocalPlayer();
 
+    // 맵 경계 정의 (80x80 맵의 절반)
+    this.mapBounds = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
+    this.damageTimer = 0;
+    this.damageInterval = 1.0; // 1초마다 데미지
+    this.damageAmount = 5; // 데미지량
+
     window.addEventListener('resize', () => this.OnWindowResize(), false);
   }
 
@@ -217,6 +223,23 @@ export class GameStage3 {
         animation: this.player_.currentAnimationName_, // Add animation state
         hp: this.player_.hp_ // Add HP state
       });
+
+      // 맵 경계 체크 및 데미지 적용
+      const playerPos = this.player_.mesh_.position;
+      if (
+        playerPos.x < this.mapBounds.minX ||
+        playerPos.x > this.mapBounds.maxX ||
+        playerPos.z < this.mapBounds.minZ ||
+        playerPos.z > this.mapBounds.maxZ
+      ) {
+        this.damageTimer += delta;
+        if (this.damageTimer >= this.damageInterval) {
+          this.player_.TakeDamage(this.damageAmount);
+          this.damageTimer = 0;
+        }
+      } else {
+        this.damageTimer = 0; // 맵 안으로 들어오면 타이머 초기화
+      }
 
       // HP UI 업데이트
       if (this.player_.hpUI) {
