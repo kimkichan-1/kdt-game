@@ -78,7 +78,7 @@ export const hp = (() => {
 
       // 플레이어 이름
       this.hpName = document.createElement('div');
-      this.hpName.innerText = isNPC ? 'Viking' : '김기찬'; // Placeholder name
+      this.hpName.innerText = isNPC ? 'Viking' : 'Player'; // Placeholder name
       this.hpName.style.color = '#bfe8ff';
       this.hpName.style.fontWeight = 'bold';
       this.hpName.style.fontSize = '17px';
