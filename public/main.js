@@ -160,7 +160,6 @@ export class GameStage3 {
         // Create a new player object for the new player
         otherPlayer = new player.Player({
           scene: this.scene,
-          color: 0x00ff00, // Different color for other players
           character: remotePlayerData.character,
           isRemote: true
         });
