@@ -40,6 +40,8 @@ export const player = (() => {
       this.hp_ = 100; // HP 속성 추가
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
       this.isDead_ = false; // 죽음 상태 플래그 추가
+      this.respawnDelay_ = 3; // 리스폰 딜레이 (초)
+      this.respawnTimer_ = 0; // 리스폰 타이머
 
       this.LoadModel_(params.character);
       if (!params.isRemote) {
@@ -60,6 +62,7 @@ export const player = (() => {
         this.isDead_ = true; // 죽음 상태로 설정
         this.SetAnimation_('Death'); // Death 애니메이션 재생
         this.DisableInput_(); // 키 입력 비활성화
+        this.respawnTimer_ = this.respawnDelay_; // 리스폰 타이머 초기화
       }
     }
 
@@ -220,6 +223,15 @@ export const player = (() => {
       }
     }
 
+    Respawn_() {
+      this.hp_ = 100; // 체력 초기화
+      this.isDead_ = false; // 죽음 상태 해제
+      this.hpUI.updateHP(this.hp_); // HPUI 업데이트
+      this.InitInput_(); // 입력 활성화
+      this.SetAnimation_('Idle'); // Idle 애니메이션으로 설정
+      this.SetPosition([0, 0, 0]); // 초기 위치로 이동 (임시)
+    }
+
     SetPosition(position) {
       this.position_.set(position[0], position[1], position[2]);
       if (this.mesh_) {
@@ -262,6 +274,17 @@ export const player = (() => {
         return;
       }
       if (!this.mesh_) return;
+
+      if (this.isDead_) {
+        this.respawnTimer_ -= timeElapsed;
+        if (this.respawnTimer_ <= 0) {
+          this.Respawn_();
+        }
+        if (this.mixer_) {
+          this.mixer_.update(timeElapsed);
+        }
+        return; // 죽은 상태에서는 다른 업데이트 로직을 건너뜀
+      }
 
       this.lastRotationAngle_ = rotationAngle;
 
