@@ -39,6 +39,7 @@ export const player = (() => {
 
       this.hp_ = 100; // HP 속성 추가
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
+      this.isDead_ = false; // 죽음 상태 플래그 추가
 
       this.LoadModel_(params.character);
       if (!params.isRemote) {
@@ -56,6 +57,7 @@ export const player = (() => {
       }
 
       if (this.hp_ === 0) {
+        this.isDead_ = true; // 죽음 상태로 설정
         this.SetAnimation_('Death'); // Death 애니메이션 재생
         this.DisableInput_(); // 키 입력 비활성화
       }
@@ -190,6 +192,7 @@ export const player = (() => {
 
     SetAnimation_(name) {
       if (this.currentAnimationName_ === name) return;
+      if (this.isDead_ && name !== 'Death') return; // 죽음 상태일 때는 Death 애니메이션만 허용
 
       this.currentAnimationName_ = name;
       if (this.currentAction_) {
@@ -208,6 +211,9 @@ export const player = (() => {
           this.currentAction_.clampWhenFinished = true;
           this.currentAction_.time = 0.0;
           this.currentAction_.timeScale = 1.2;
+        } else if (name === 'Death') { // Death 애니메이션은 한 번만 재생
+          this.currentAction_.setLoop(THREE.LoopOnce);
+          this.currentAction_.clampWhenFinished = true;
         } else {
           this.currentAction_.timeScale = 1.0;
         }
