@@ -17,7 +17,7 @@ export const hp = (() => {
       this.texture = new THREE.CanvasTexture(this.canvas);
       this.material = new THREE.SpriteMaterial({ map: this.texture, transparent: true });
       this.sprite = new THREE.Sprite(this.material);
-      this.sprite.scale.set(2, 0.5, 1); // Adjust scale to fit above head
+      this.sprite.scale.set(2.2, 0.55, 1); // Adjust scale to fit above head
       this.scene.add(this.sprite);
 
       this.playerMesh = null;
