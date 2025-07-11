@@ -150,7 +150,6 @@ export const player = (() => {
       if (this.currentAnimationName_ === name) return;
 
       this.currentAnimationName_ = name;
-      if (this.currentAction_ === this.animations_[name]) return;
       if (this.currentAction_) {
         this.currentAction_.fadeOut(0.3);
       }
@@ -187,9 +186,6 @@ export const player = (() => {
     }
 
     SetRemoteAnimation(animationName) {
-      if (this.currentAnimationName_ === animationName) return;
-
-      this.currentAnimationName_ = animationName;
       this.SetAnimation_(animationName);
     }
 
