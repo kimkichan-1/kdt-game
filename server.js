@@ -9,6 +9,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 const rooms = {}; // { roomId: { players: [{ id: socket.id, ready: false }], gameState: {} } }
+const MAX_PLAYERS_PER_ROOM = 2; // 최대 플레이어 수
 
 // Helper function to update all players in a room
 function updateRoomPlayers(roomId) {
@@ -42,6 +43,11 @@ io.on('connection', (socket) => {
       // Check if player is already in the room
       if (rooms[roomId].players.some(p => p.id === socket.id)) {
         socket.emit('roomError', 'Already in this room');
+        return;
+      }
+      // Check if room is full
+      if (rooms[roomId].players.length >= MAX_PLAYERS_PER_ROOM) {
+        socket.emit('roomError', 'Room is full');
         return;
       }
       socket.join(roomId);
