@@ -195,6 +195,10 @@ export const player = (() => {
       this.position_.set(position[0], position[1], position[2]);
       if (this.mesh_) {
         this.mesh_.position.copy(this.position_);
+        // 위치가 업데이트될 때 HPUI도 업데이트
+        if (this.hpUI) {
+          this.hpUI.updatePosition();
+        }
       }
     }
 
