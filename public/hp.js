@@ -21,7 +21,7 @@ export const hp = (() => {
       this.scene.add(this.sprite);
 
       this.playerMesh = null;
-      this.offset = new THREE.Vector3(0, 4.0, 0); // Offset above the character's head
+      this.offset = new THREE.Vector3(0, 5.0, 0); // Offset above the character's head
 
       this.drawUI();
     }
