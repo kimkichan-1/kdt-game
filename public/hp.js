@@ -22,7 +22,7 @@ export const hp = (() => {
 
       this.playerMesh = null;
       this.headBone = null;
-      this.offset = new THREE.Vector3(0, 0.5, 0); // Offset above the character's head
+      this.offset = new THREE.Vector3(0, 0.8, 0); // Offset above the character's head
 
       this.drawUI();
     }
