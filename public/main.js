@@ -130,9 +130,9 @@ export class GameStage3 {
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
       character: localPlayerData.character,
-      hpUI: new hp.HPUI() // HPUI 인스턴스 생성 및 전달
+      hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`) // HPUI 인스턴스 생성 및 전달
     });
-    this.player_.hpUI.setTarget(this.player_); // HPUI에 플레이어 연결
+    // this.player_.hpUI.setTarget(this.player_); // setTarget은 이제 player.js 내부에서 호출됩니다.
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
     this.rotationAngle = 4.715;
@@ -164,7 +164,8 @@ export class GameStage3 {
         otherPlayer = new player.Player({
           scene: this.scene,
           character: remotePlayerData.character,
-          isRemote: true
+          isRemote: true,
+          hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${data.playerId.substring(0, 4)}`) // 원격 플레이어 HPUI 생성
         });
         this.players[data.playerId] = otherPlayer;
       }
@@ -172,6 +173,13 @@ export class GameStage3 {
       otherPlayer.SetRotation(data.rotation);
       if (data.animation) {
         otherPlayer.SetRemoteAnimation(data.animation);
+      }
+      // 원격 플레이어 HP 업데이트
+      if (data.hp !== undefined) {
+        otherPlayer.hp_ = data.hp;
+        if (otherPlayer.hpUI) {
+          otherPlayer.hpUI.updateHP(data.hp);
+        }
       }
     });
 

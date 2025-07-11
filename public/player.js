@@ -154,6 +154,11 @@ export const player = (() => {
           this.animations_[clip.name] = this.mixer_.clipAction(clip);
         }
         this.SetAnimation_('Idle');
+
+        // HPUI에 플레이어 mesh 연결
+        if (this.hpUI) {
+          this.hpUI.setPlayerMesh(this.mesh_);
+        }
       });
     }
 
@@ -471,6 +476,11 @@ export const player = (() => {
 
       if (this.mixer_) {
         this.mixer_.update(timeElapsed);
+      }
+
+      // HPUI 위치 업데이트
+      if (this.hpUI) {
+        this.hpUI.updatePosition();
       }
     }
   }
