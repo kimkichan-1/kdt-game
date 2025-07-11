@@ -12,6 +12,7 @@ export const player = (() => {
       this.mixer_ = null;
       this.animations_ = {};
       this.currentAction_ = null;
+      this.currentAnimationName_ = 'Idle';
       this.keys_ = {
         forward: false,
         backward: false,
@@ -146,6 +147,9 @@ export const player = (() => {
     }
 
     SetAnimation_(name) {
+      if (this.currentAnimationName_ === name) return;
+
+      this.currentAnimationName_ = name;
       if (this.currentAction_ === this.animations_[name]) return;
       if (this.currentAction_) {
         this.currentAction_.fadeOut(0.3);
@@ -182,6 +186,13 @@ export const player = (() => {
       }
     }
 
+    SetRemoteAnimation(animationName) {
+      if (this.currentAnimationName_ === animationName) return;
+
+      this.currentAnimationName_ = animationName;
+      this.SetAnimation_(animationName);
+    }
+
     UpdateDebugVisuals() {
       if (this.boundingBoxHelper_) {
         this.boundingBoxHelper_.visible = this.keys_.debug;
@@ -192,7 +203,12 @@ export const player = (() => {
     }
 
     Update(timeElapsed, rotationAngle = 0, collidables = []) {
-      if (this.params_.isRemote) return;
+      if (this.params_.isRemote) {
+        if (this.mixer_) {
+          this.mixer_.update(timeElapsed);
+        }
+        return;
+      }
       if (!this.mesh_) return;
 
       this.lastRotationAngle_ = rotationAngle;

@@ -167,6 +167,9 @@ export class GameStage3 {
       }
       otherPlayer.SetPosition(data.position);
       otherPlayer.SetRotation(data.rotation);
+      if (data.animation) {
+        otherPlayer.SetRemoteAnimation(data.animation);
+      }
     });
 
     this.socket.on('playerJoined', (playerId) => {
@@ -200,7 +203,12 @@ export class GameStage3 {
         playerId: this.localPlayerId,
         position: this.player_.mesh_.position.toArray(),
         rotation: this.player_.mesh_.rotation.toArray(),
+        animation: this.player_.currentAnimationName_ // Add animation state
       });
+    }
+
+    for (const id in this.players) {
+      this.players[id].Update(delta);
     }
 
     if (this.npc_) {
