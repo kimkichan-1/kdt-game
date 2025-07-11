@@ -482,7 +482,7 @@ export const player = (() => {
       }
 
       // HPUI 위치 업데이트
-      if (this.hpUI) {
+      if (this.hpUI && this.hpUI.playerMesh && this.hpUI.headBone) { // hpUI, playerMesh, headBone 모두 유효한지 확인
         this.hpUI.updatePosition();
       }
 
