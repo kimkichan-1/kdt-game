@@ -21,7 +21,7 @@ export const hp = (() => {
       this.scene.add(this.sprite);
 
       this.playerMesh = null;
-      this.offset = new THREE.Vector3(0, 3.5, 0); // Offset above the character's head
+      this.offset = new THREE.Vector3(0, 4.0, 0); // Offset above the character's head
 
       this.drawUI();
     }
@@ -40,7 +40,7 @@ export const hp = (() => {
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
       // Draw background for name and bar
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent background
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; // Semi-transparent background
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
       // Player Name
