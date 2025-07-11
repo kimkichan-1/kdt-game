@@ -36,7 +36,7 @@ export const player = (() => {
       this.rollCooldown_ = 1.0;
       this.rollCooldownTimer_ = 0;
 
-      this.LoadModel_(params.color);
+      this.LoadModel_(params.color, params.character);
       if (!params.isRemote) {
         this.InitInput_();
       }
@@ -107,10 +107,10 @@ export const player = (() => {
       }
     }
 
-    LoadModel_(color = 0xffffff) {
+    LoadModel_(color = 0xffffff, characterName = 'Knight_Male') { // 기본값으로 Knight_Male 설정
       const loader = new GLTFLoader();
       loader.setPath('./resources/Ultimate Animated Character Pack - Nov 2019/glTF/');
-      loader.load('Knight_Male.gltf', (gltf) => {
+      loader.load(`${characterName}.gltf`, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(1);
         model.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);

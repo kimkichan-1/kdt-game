@@ -7,10 +7,11 @@ import { math } from './math.js';
 const socket = io();
 
 export class GameStage3 {
-  constructor(socket) {
+  constructor(socket, players) {
     this.socket = socket;
     this.players = {}; // To store other players' objects
     this.localPlayerId = socket.id;
+    this.playerInfo = players;
 
     this.Initialize();
     this.RAF();
@@ -122,9 +123,12 @@ export class GameStage3 {
     const npcPos = new THREE.Vector3(0, 0, -4);
     this.npc_ = new object.NPC(this.scene, npcPos);
 
+    const localPlayerData = this.playerInfo.find(p => p.id === this.localPlayerId);
+
     this.player_ = new player.Player({
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
+      character: localPlayerData.character
     });
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
@@ -152,10 +156,13 @@ export class GameStage3 {
 
       let otherPlayer = this.players[data.playerId];
       if (!otherPlayer) {
+        const remotePlayerData = this.playerInfo.find(p => p.id === data.playerId);
         // Create a new player object for the new player
         otherPlayer = new player.Player({
           scene: this.scene,
           color: 0x00ff00, // Different color for other players
+          character: remotePlayerData.character,
+          isRemote: true
         });
         this.players[data.playerId] = otherPlayer;
       }
@@ -255,7 +262,8 @@ popupCloseButton.addEventListener('click', () => {
 });
 
 readyButton.addEventListener('click', () => {
-  socket.emit('ready');
+  const selectedCharacter = document.getElementById('charSelect').value;
+  socket.emit('ready', selectedCharacter);
 });
 
 socket.on('roomCreated', (roomId) => {
@@ -277,10 +285,10 @@ socket.on('updatePlayers', (players) => {
   updatePlayers(players);
 });
 
-socket.on('startGame', () => {
+socket.on('startGame', (players) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage3(socket);
+  new GameStage3(socket, players);
 });
 
 socket.on('roomError', (message) => {

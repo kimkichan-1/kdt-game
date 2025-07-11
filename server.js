@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
 
   socket.on('createRoom', () => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    rooms[roomId] = { players: [{ id: socket.id, ready: false }], gameState: {} };
+    rooms[roomId] = { players: [{ id: socket.id, ready: false, character: 'Knight_Male' }], gameState: {} };
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access
     console.log(`Room created: ${roomId} by ${socket.id}`);
@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false });
+      rooms[roomId].players.push({ id: socket.id, ready: false, character: 'Knight_Male' });
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', roomId);
@@ -55,17 +55,18 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('ready', () => {
+  socket.on('ready', (character) => {
     if (socket.roomId && rooms[socket.roomId]) {
       const playerIndex = rooms[socket.roomId].players.findIndex(p => p.id === socket.id);
       if (playerIndex !== -1) {
         rooms[socket.roomId].players[playerIndex].ready = !rooms[socket.roomId].players[playerIndex].ready;
+        rooms[socket.roomId].players[playerIndex].character = character;
         updateRoomPlayers(socket.roomId);
 
         // Check if all players are ready
         const allReady = rooms[socket.roomId].players.every(p => p.ready);
         if (allReady && rooms[socket.roomId].players.length > 0) {
-          io.to(socket.roomId).emit('startGame');
+          io.to(socket.roomId).emit('startGame', rooms[socket.roomId].players);
         }
       }
     }
