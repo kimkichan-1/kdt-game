@@ -21,13 +21,15 @@ export const hp = (() => {
       this.scene.add(this.sprite);
 
       this.playerMesh = null;
-      this.offset = new THREE.Vector3(0, 5.0, 0); // Offset above the character's head
+      this.headBone = null;
+      this.offset = new THREE.Vector3(0, 0.5, 0); // Offset above the character's head
 
       this.drawUI();
     }
 
-    setPlayerMesh(mesh) {
-      this.playerMesh = mesh;
+    setPlayerTarget(playerMesh, headBone) {
+      this.playerMesh = playerMesh;
+      this.headBone = headBone;
     }
 
     updateHP(newHp) {
@@ -68,11 +70,17 @@ export const hp = (() => {
     }
 
     updatePosition() {
-      if (this.playerMesh) {
+      if (this.playerMesh && this.headBone) {
+        const headWorldPosition = new THREE.Vector3();
+        this.headBone.getWorldPosition(headWorldPosition);
+        this.sprite.position.copy(headWorldPosition).add(this.offset);
+        // console.log(`HPUI Head Y: ${headWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
+      } else if (this.playerMesh) {
+        // headBone이 없는 경우를 대비하여 기존 로직 유지 (fallback)
         const playerWorldPosition = new THREE.Vector3();
         this.playerMesh.getWorldPosition(playerWorldPosition);
         this.sprite.position.copy(playerWorldPosition).add(this.offset);
-        console.log(`HPUI Player Y: ${playerWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 추가
+        // console.log(`HPUI Player Y (fallback): ${playerWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
       }
     }
 

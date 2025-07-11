@@ -134,6 +134,9 @@ export const player = (() => {
             c.castShadow = true;
             c.receiveShadow = true;
           }
+          if (c.isBone && c.name === 'Head') { // Head bone 찾기
+            this.headBone = c;
+          }
         });
 
         // 고정된 크기의 바운딩 박스 초기화
@@ -155,9 +158,9 @@ export const player = (() => {
         }
         this.SetAnimation_('Idle');
 
-        // HPUI에 플레이어 mesh 연결
+        // HPUI에 플레이어 mesh와 headBone 연결
         if (this.hpUI) {
-          this.hpUI.setPlayerMesh(this.mesh_);
+          this.hpUI.setPlayerTarget(this.mesh_, this.headBone);
         }
       });
     }
@@ -483,7 +486,7 @@ export const player = (() => {
         this.hpUI.updatePosition();
       }
 
-      console.log(`Player Y: ${this.mesh_.position.y}`); // 디버그 로그 추가
+      console.log(`Player Y: ${this.mesh_.position.y}`); // 디버그 로그 제거
     }
   }
 
