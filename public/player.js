@@ -47,10 +47,17 @@ export const player = (() => {
     }
 
     TakeDamage(amount) {
+      if (this.hp_ <= 0) return; // 이미 죽었으면 데미지 입지 않음
+
       this.hp_ -= amount;
       if (this.hp_ < 0) this.hp_ = 0;
       if (this.hpUI) {
         this.hpUI.updateHP(this.hp_);
+      }
+
+      if (this.hp_ === 0) {
+        this.SetAnimation_('Death'); // Death 애니메이션 재생
+        this.DisableInput_(); // 키 입력 비활성화
       }
     }
 
@@ -59,7 +66,22 @@ export const player = (() => {
       window.addEventListener('keyup', (e) => this.OnKeyUp_(e), false);
     }
 
+    DisableInput_() {
+      window.removeEventListener('keydown', (e) => this.OnKeyDown_(e), false);
+      window.removeEventListener('keyup', (e) => this.OnKeyUp_(e), false);
+      // 모든 키 상태 초기화
+      this.keys_ = {
+        forward: false,
+        backward: false,
+        left: false,
+        right: false,
+        shift: false,
+        debug: false,
+      };
+    }
+
     OnKeyDown_(event) {
+      if (this.hp_ <= 0) return; // 죽었으면 입력 무시
       switch (event.code) {
         case 'KeyW': this.keys_.forward = true; break;
         case 'KeyS': this.keys_.backward = true; break;
@@ -109,6 +131,7 @@ export const player = (() => {
     }
 
     OnKeyUp_(event) {
+      if (this.hp_ <= 0) return; // 죽었으면 입력 무시
       switch (event.code) {
         case 'KeyW': this.keys_.forward = false; break;
         case 'KeyS': this.keys_.backward = false; break;
