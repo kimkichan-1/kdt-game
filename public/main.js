@@ -214,7 +214,8 @@ export class GameStage3 {
         playerId: this.localPlayerId,
         position: this.player_.mesh_.position.toArray(),
         rotation: this.player_.mesh_.rotation.toArray(),
-        animation: this.player_.currentAnimationName_ // Add animation state
+        animation: this.player_.currentAnimationName_, // Add animation state
+        hp: this.player_.hp_ // Add HP state
       });
 
       // HP UI 업데이트
