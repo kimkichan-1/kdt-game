@@ -3,6 +3,7 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples
 import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
+import { hp } from './hp.js'; // hp.js 임포트
 
 const socket = io();
 
@@ -128,8 +129,10 @@ export class GameStage3 {
     this.player_ = new player.Player({
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
-      character: localPlayerData.character
+      character: localPlayerData.character,
+      hpUI: new hp.HPUI() // HPUI 인스턴스 생성 및 전달
     });
+    this.player_.hpUI.setTarget(this.player_); // HPUI에 플레이어 연결
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
     this.rotationAngle = 4.715;
@@ -205,6 +208,11 @@ export class GameStage3 {
         rotation: this.player_.mesh_.rotation.toArray(),
         animation: this.player_.currentAnimationName_ // Add animation state
       });
+
+      // HP UI 업데이트
+      if (this.player_.hpUI) {
+        this.player_.hpUI.updateHP(this.player_.hp_);
+      }
     }
 
     for (const id in this.players) {

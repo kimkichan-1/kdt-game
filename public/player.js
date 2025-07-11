@@ -37,9 +37,20 @@ export const player = (() => {
       this.rollCooldown_ = 1.0;
       this.rollCooldownTimer_ = 0;
 
+      this.hp_ = 100; // HP 속성 추가
+      this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
+
       this.LoadModel_(params.character);
       if (!params.isRemote) {
         this.InitInput_();
+      }
+    }
+
+    TakeDamage(amount) {
+      this.hp_ -= amount;
+      if (this.hp_ < 0) this.hp_ = 0;
+      if (this.hpUI) {
+        this.hpUI.updateHP(this.hp_);
       }
     }
 

@@ -120,6 +120,73 @@
     color: #fffb02;
     margin-bottom: 10px;
   }
+  /* HP Bar UI styles */
+  .hp-bar-container {
+    position: absolute;
+    z-index: 200;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #235280;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0px 8px #2228;
+    padding: 6px 16px 6px 6px;
+    height: 60px;
+    min-width: 250px;
+  }
+  .hp-profile {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    background: #222;
+    object-fit: cover;
+    margin-right: 12px;
+    box-shadow: 0 1px 4px #0008;
+  }
+  .hp-bar-bg {
+    position: relative;
+    width: 170px;
+    height: 20px;
+    background: #1a2a1a;
+    border: 2px solid #444;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-right: 12px;
+  }
+  .hp-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #e22 70%, #f88 100%);
+    transition: width 0.25s;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .hp-number {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #fff;
+    font-size: 15px;
+    text-shadow: 0 0 3px #000, 0 1px 4px #222c;
+    pointer-events: none;
+    transition: left 0.25s;
+  }
+  .hp-name {
+    color: #bfe8ff;
+    font-weight: bold;
+    font-size: 17px;
+    text-shadow: 1px 1px 3px #222c;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .hp-text-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   </style>
 </head>
 <body>
