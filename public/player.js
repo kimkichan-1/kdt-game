@@ -107,7 +107,8 @@ export const player = (() => {
         this.hitEffect.style.left = '0';
         this.hitEffect.style.width = '100vw';
         this.hitEffect.style.height = '100vh';
-        this.hitEffect.style.backgroundColor = 'rgba(255, 0, 0, 0.25)';
+        this.hitEffect.style.backgroundColor = 'transparent';
+        this.hitEffect.style.boxShadow = 'inset 0 0 0 10px rgba(255, 0, 0, 0.5)';
         this.hitEffect.style.zIndex = '998';
         this.hitEffect.style.pointerEvents = 'none';
         this.hitEffect.style.opacity = '0';
