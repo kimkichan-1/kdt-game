@@ -190,6 +190,10 @@ export const player = (() => {
         if (this.hpUI) {
           this.hpUI.setPlayerTarget(this.mesh_, this.headBone);
         }
+
+        if (this.params_.onLoad) {
+          this.params_.onLoad();
+        }
       });
     }
 

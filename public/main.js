@@ -143,10 +143,11 @@ export class GameStage3 {
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
       character: localPlayerData.character,
-      hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`) // HPUI 인스턴스 생성 및 전달
+      hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`), // HPUI 인스턴스 생성 및 전달
+      onLoad: () => {
+        this.player_.mesh_.position.copy(this.getRandomPosition());
+      }
     });
-    
-    this.player_.mesh_.position.copy(this.getRandomPosition());
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
     this.rotationAngle = 4.715;
