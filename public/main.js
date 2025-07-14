@@ -140,8 +140,9 @@ export class GameStage3 {
     let objectFound = false;
 
     for (const collidable of collidables) {
-      const intersection = raycaster.intersectBox(collidable.boundingBox);
-      if (intersection) {
+      const intersects = raycaster.intersectObject(collidable.model, true); // true for recursive
+      if (intersects.length > 0) {
+        const intersection = intersects[0];
         if (intersection.point.y > highestY) {
           highestY = intersection.point.y;
           objectFound = true;
