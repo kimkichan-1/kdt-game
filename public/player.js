@@ -108,7 +108,7 @@ export const player = (() => {
         this.hitEffect.style.width = '100vw';
         this.hitEffect.style.height = '100vh';
         this.hitEffect.style.backgroundColor = 'transparent';
-        this.hitEffect.style.boxShadow = 'inset 0 0 0 10px rgba(255, 0, 0, 0.5)';
+        this.hitEffect.style.boxShadow = 'inset 0 0 0 1000px rgba(255, 0, 0, 0.1), inset 0 0 0 500px rgba(255, 0, 0, 0.2), inset 0 0 0 200px rgba(255, 0, 0, 0.3), inset 0 0 0 50px rgba(255, 0, 0, 0.4)';
         this.hitEffect.style.zIndex = '998';
         this.hitEffect.style.pointerEvents = 'none';
         this.hitEffect.style.opacity = '0';
