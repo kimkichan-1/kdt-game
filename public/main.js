@@ -49,6 +49,7 @@ export class GameStage3 {
     this.damageTimer = 0;
     this.damageInterval = 1.0; // 1초마다 데미지
     this.damageAmount = 25; // 데미지량
+    this.isRespawning = false;
 
     window.addEventListener('resize', () => this.OnWindowResize(), false);
   }
@@ -126,6 +127,12 @@ export class GameStage3 {
     this.scene.add(this.ground);
   }
 
+  getRandomPosition() {
+    const x = Math.random() * 80 - 40;
+    const z = Math.random() * 80 - 40;
+    return new THREE.Vector3(x, 0.5, z);
+  }
+
   CreateLocalPlayer() {
     const npcPos = new THREE.Vector3(0, 0, -4);
     this.npc_ = new object.NPC(this.scene, npcPos);
@@ -138,7 +145,8 @@ export class GameStage3 {
       character: localPlayerData.character,
       hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`) // HPUI 인스턴스 생성 및 전달
     });
-    // this.player_.hpUI.setTarget(this.player_); // setTarget은 이제 player.js 내부에서 호출됩니다.
+    
+    this.player_.mesh_.position.copy(this.getRandomPosition());
 
     this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
     this.rotationAngle = 4.715;
@@ -244,6 +252,17 @@ export class GameStage3 {
       // HP UI 업데이트
       if (this.player_.hpUI) {
         this.player_.hpUI.updateHP(this.player_.hp_);
+      }
+
+      if (this.player_.hp_ <= 0 && !this.isRespawning) {
+        this.isRespawning = true;
+        // Show dead message or any other UI
+        setTimeout(() => {
+          this.player_.mesh_.position.copy(this.getRandomPosition());
+          this.player_.hp_ = 100; // Reset HP
+          this.isRespawning = false;
+          // Hide dead message
+        }, 2000); // 2-second respawn delay
       }
     }
 
