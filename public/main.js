@@ -343,7 +343,8 @@ const readyButton = document.getElementById('readyButton');
 
 // New elements for create room popup
 const createRoomSettingsPopup = document.getElementById('createRoomSettingsPopup');
-const mapSelect = document.getElementById('mapSelect');
+const mapSelectionContainer = document.getElementById('mapSelectionContainer');
+const mapThumbnails = document.querySelectorAll('.map-thumbnail');
 const maxPlayersCreate = document.getElementById('maxPlayersCreate');
 const roomVisibility = document.getElementById('roomVisibility');
 const roundTime = document.getElementById('roundTime');
@@ -365,7 +366,8 @@ createRoomButton.addEventListener('click', () => {
 });
 
 createRoomConfirmButton.addEventListener('click', () => {
-  const selectedMap = mapSelect.value;
+  const selectedMapElement = document.querySelector('.map-thumbnail.selected');
+  const selectedMap = selectedMapElement ? selectedMapElement.dataset.map : 'map1'; // Default to map1 if none selected
   const maxPlayers = parseInt(maxPlayersCreate.value, 10);
   const visibility = roomVisibility.value;
   const roundDuration = parseInt(roundTime.value, 10);
@@ -387,6 +389,14 @@ createRoomConfirmButton.addEventListener('click', () => {
 
 createRoomCancelButton.addEventListener('click', () => {
   createRoomSettingsPopup.style.display = 'none'; // Hide popup
+});
+
+// Map selection logic
+mapThumbnails.forEach(thumbnail => {
+  thumbnail.addEventListener('click', () => {
+    mapThumbnails.forEach(t => t.classList.remove('selected'));
+    thumbnail.classList.add('selected');
+  });
 });
 
 joinRoomMainButton.addEventListener('click', () => {
