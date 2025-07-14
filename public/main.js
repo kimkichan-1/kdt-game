@@ -128,33 +128,60 @@ export class GameStage3 {
   }
 
   getRandomPosition() {
-    const x = Math.random() * 80 - 40;
-    const z = Math.random() * 80 - 40;
-    let y = 0.5; // Default y position
+    const maxAttempts = 100; // 최대 시도 횟수
+    const playerHalfWidth = 0.65; // player.js의 halfWidth
+    const playerHalfDepth = 0.65; // player.js의 halfDepth
+    const playerHeight = 3.2; // player.js의 halfHeight * 2
 
-    const collidables = this.npc_.GetCollidables();
-    const checkPosition = new THREE.Vector3(x, 100, z); // Check from a high position
-    const raycaster = new THREE.Raycaster(checkPosition, new THREE.Vector3(0, -1, 0));
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const x = Math.random() * 80 - 40;
+      const z = Math.random() * 80 - 40;
+      let y = 0.5; // Default y position
 
-    let highestY = -Infinity;
-    let objectFound = false;
+      const collidables = this.npc_.GetCollidables();
+      const checkPosition = new THREE.Vector3(x, 100, z); // Check from a high position
+      const raycaster = new THREE.Raycaster(checkPosition, new THREE.Vector3(0, -1, 0));
 
-    for (const collidable of collidables) {
-      const intersects = raycaster.intersectObject(collidable.model, true); // true for recursive
-      if (intersects.length > 0) {
-        const intersection = intersects[0];
-        if (intersection.point.y > highestY) {
-          highestY = intersection.point.y;
-          objectFound = true;
+      let highestY = -Infinity;
+      let objectFound = false;
+
+      for (const collidable of collidables) {
+        const intersects = raycaster.intersectObject(collidable.model, true); // true for recursive
+        if (intersects.length > 0) {
+          const intersection = intersects[0];
+          if (intersection.point.y > highestY) {
+            highestY = intersection.point.y;
+            objectFound = true;
+          }
         }
+      }
+
+      if (objectFound) {
+        y = highestY + 0.1; // Place slightly above the object
+      }
+
+      // 플레이어의 임시 바운딩 박스 생성
+      const tempPlayerBox = new THREE.Box3(
+        new THREE.Vector3(x - playerHalfWidth, y, z - playerHalfDepth),
+        new THREE.Vector3(x + playerHalfWidth, y + playerHeight, z + playerHalfDepth)
+      );
+
+      let isColliding = false;
+      for (const collidable of collidables) {
+        if (tempPlayerBox.intersectsBox(collidable.boundingBox)) {
+          isColliding = true;
+          break;
+        }
+      }
+
+      if (!isColliding) {
+        return new THREE.Vector3(x, y, z);
       }
     }
 
-    if (objectFound) {
-      y = highestY + 0.1; // Place slightly above the object
-    }
-
-    return new THREE.Vector3(x, y, z);
+    // 최대 시도 횟수를 초과하면 기본 위치 반환 (최후의 수단)
+    console.warn("Failed to find a non-colliding spawn position after multiple attempts.");
+    return new THREE.Vector3(0, 0.5, 0);
   }
 
   CreateLocalPlayer() {
