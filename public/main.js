@@ -332,7 +332,8 @@ const controls = document.getElementById('controls');
 const createRoomButton = document.getElementById('createRoomButton');
 const joinRoomMainButton = document.getElementById('joinRoomMainButton');
 const joinRoomPopup = document.getElementById('joinRoomPopup');
-const popupRoomIdInput = document.getElementById('popupRoomIdInput');
+const publicRoomList = document.getElementById('publicRoomList');
+const privateRoomCodeInput = document.getElementById('privateRoomCodeInput');
 const popupJoinButton = document.getElementById('popupJoinButton');
 const popupCloseButton = document.getElementById('popupCloseButton');
 const waitingRoom = document.getElementById('waitingRoom');
@@ -401,18 +402,56 @@ mapThumbnails.forEach(thumbnail => {
 
 joinRoomMainButton.addEventListener('click', () => {
   joinRoomPopup.style.display = 'flex'; // Show popup
+  socket.emit('getPublicRooms'); // Request public rooms
+});
+
+let selectedPublicRoomId = null;
+
+socket.on('publicRoomsList', (rooms) => {
+  publicRoomList.innerHTML = '';
+  if (rooms.length === 0) {
+    publicRoomList.innerHTML = '<li style="padding: 10px; border-bottom: 1px solid #eee; text-align: left;">공개방이 없습니다.</li>';
+    return;
+  }
+  rooms.forEach(room => {
+    const li = document.createElement('li');
+    li.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; text-align: left; cursor: pointer; background-color: #f9f9f9;';
+    li.textContent = `방 ID: ${room.id.substring(0, 4)} (인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
+    li.dataset.roomId = room.id;
+    li.addEventListener('click', () => {
+      if (selectedPublicRoomId === room.id) {
+        selectedPublicRoomId = null;
+        li.style.backgroundColor = '#f9f9f9';
+      } else {
+        const prevSelected = document.querySelector('#publicRoomList li[style*="background-color: #e0e0e0"]');
+        if (prevSelected) {
+          prevSelected.style.backgroundColor = '#f9f9f9';
+        }
+        selectedPublicRoomId = room.id;
+        li.style.backgroundColor = '#e0e0e0';
+      }
+    });
+    publicRoomList.appendChild(li);
+  });
 });
 
 popupJoinButton.addEventListener('click', () => {
-  const roomId = popupRoomIdInput.value.trim();
-  if (roomId) {
-    socket.emit('joinRoom', roomId);
+  let roomIdToJoin = null;
+  if (selectedPublicRoomId) {
+    roomIdToJoin = selectedPublicRoomId;
+  } else {
+    roomIdToJoin = privateRoomCodeInput.value.trim();
+  }
+
+  if (roomIdToJoin) {
+    socket.emit('joinRoom', roomIdToJoin);
     joinRoomPopup.style.display = 'none'; // Hide popup after joining
     menu.style.display = 'none';
     waitingRoom.style.display = 'flex'; // Show waiting room while waiting for join confirmation
-    waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
+    waitingRoomIdDisplay.textContent = `방 ID: ${roomIdToJoin}`;
+    selectedPublicRoomId = null; // Reset selected room
   } else {
-    alert('방 ID를 입력해주세요.');
+    alert('공개방을 선택하거나 비밀방 코드를 입력해주세요.');
   }
 });
 

@@ -273,8 +273,18 @@
   <div id="joinRoomPopup" class="popup-overlay" style="display: none;">
     <div class="popup-content">
       <h2>방 참가</h2>
-      <input type="text" id="popupRoomIdInput" placeholder="방 ID 입력">
-      <button id="popupJoinButton">입장</button>
+      <div id="publicRoomListContainer" style="margin-bottom: 20px;">
+        <h3>공개방 목록</h3>
+        <ul id="publicRoomList" style="list-style: none; padding: 0; max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 5px;">
+          <!-- Public rooms will be dynamically loaded here -->
+          <li style="padding: 10px; border-bottom: 1px solid #eee; text-align: left;">공개방이 없습니다.</li>
+        </ul>
+      </div>
+      <div style="margin-top: 20px;">
+        <h3>비밀방 참가</h3>
+        <input type="text" id="privateRoomCodeInput" placeholder="비밀방 코드 입력" style="width: calc(100% - 22px);">
+      </div>
+      <button id="popupJoinButton" style="margin-top: 15px;">입장</button>
       <button id="popupCloseButton">닫기</button>
     </div>
   </div>

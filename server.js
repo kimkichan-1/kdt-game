@@ -27,10 +27,21 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
+  socket.on('getPublicRooms', () => {
+    const publicRooms = Object.values(rooms).filter(room => room.visibility === 'public').map(room => ({
+      id: room.id,
+      players: room.players.length,
+      maxPlayers: room.maxPlayers,
+      map: room.map
+    }));
+    socket.emit('publicRoomsList', publicRooms);
+  });
+
   socket.on('createRoom', (roomSettings) => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
     const { map, maxPlayers, visibility, roundTime } = roomSettings;
     rooms[roomId] = {
+      id: roomId,
       players: [{ id: socket.id, ready: false, character: 'Knight_Male' }],
       gameState: {},
       map: map,
@@ -55,6 +66,11 @@ io.on('connection', (socket) => {
       // Check if room is full
       if (rooms[roomId].players.length >= rooms[roomId].maxPlayers) {
         socket.emit('roomError', 'Room is full');
+        return;
+      }
+      // If private room, check if the provided roomId matches the actual roomId
+      if (rooms[roomId].visibility === 'private' && roomId !== rooms[roomId].id) {
+        socket.emit('roomError', 'Invalid private room code');
         return;
       }
       socket.join(roomId);
