@@ -155,6 +155,12 @@ export class GameStage3 {
     this.rotationAngle = 4.715;
   }
 
+  OnWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
   UpdateCamera() {
     if (!this.player_ || !this.player_.mesh_) return;
 
