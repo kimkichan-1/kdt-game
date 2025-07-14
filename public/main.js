@@ -144,8 +144,10 @@ export class GameStage3 {
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
       character: localPlayerData.character,
       hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`), // HPUI 인스턴스 생성 및 전달
+      getRespawnPosition: () => this.getRandomPosition(),
       onLoad: () => {
-        this.player_.mesh_.position.copy(this.getRandomPosition());
+        const initialPosition = this.getRandomPosition();
+        this.player_.SetPosition([initialPosition.x, initialPosition.y, initialPosition.z]);
       }
     });
 
@@ -253,17 +255,6 @@ export class GameStage3 {
       // HP UI 업데이트
       if (this.player_.hpUI) {
         this.player_.hpUI.updateHP(this.player_.hp_);
-      }
-
-      if (this.player_.hp_ <= 0 && !this.isRespawning) {
-        this.isRespawning = true;
-        // Show dead message or any other UI
-        setTimeout(() => {
-          this.player_.mesh_.position.copy(this.getRandomPosition());
-          this.player_.hp_ = 100; // Reset HP
-          this.isRespawning = false;
-          // Hide dead message
-        }, 2000); // 2-second respawn delay
       }
     }
 

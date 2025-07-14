@@ -233,7 +233,12 @@ export const player = (() => {
       this.hpUI.updateHP(this.hp_); // HPUI 업데이트
       this.InitInput_(); // 입력 활성화
       this.SetAnimation_('Idle'); // Idle 애니메이션으로 설정
-      this.SetPosition([0, 0, 0]); // 초기 위치로 이동 (임시)
+      if (this.params_.getRespawnPosition) {
+        const respawnPosition = this.params_.getRespawnPosition();
+        this.SetPosition([respawnPosition.x, respawnPosition.y, respawnPosition.z]);
+      } else {
+        this.SetPosition([0, 0, 0]); // Fallback to default position
+      }
     }
 
     SetPosition(position) {
