@@ -45,6 +45,77 @@ export const player = (() => {
 
       this.LoadModel_(params.character);
       if (!params.isRemote) {
+        // 사망 오버레이 (상단: "또 죽었어?", 중앙: 카운트다운)
+        this.overlay = document.createElement('div');
+        this.overlay.style.position = 'fixed';
+        this.overlay.style.top = '0';
+        this.overlay.style.left = '0';
+        this.overlay.style.width = '100vw';
+        this.overlay.style.height = '100vh';
+        this.overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        this.overlay.style.zIndex = '999';
+        this.overlay.style.display = 'flex';
+        this.overlay.style.flexDirection = 'column';
+        this.overlay.style.justifyContent = 'center';
+        this.overlay.style.alignItems = 'center';
+        this.overlay.style.visibility = 'hidden';
+
+        // 오버레이 상단 문구
+        this.overlayTopMsg = document.createElement('div');
+        this.overlayTopMsg.innerText = 'Died';
+        this.overlayTopMsg.style.position = 'absolute';
+        this.overlayTopMsg.style.top = '40px';
+        this.overlayTopMsg.style.left = '50%';
+        this.overlayTopMsg.style.transform = 'translateX(-50%)';
+        this.overlayTopMsg.style.fontSize = '90px';
+        this.overlayTopMsg.style.fontWeight = '900';
+        this.overlayTopMsg.style.fontFamily = 'Impact, Arial Black, sans-serif';
+        this.overlayTopMsg.style.color = '#ff2222';
+        this.overlayTopMsg.style.textShadow =
+          '0 0 16px #ff4444, 0 4px 16px #000, 2px 2px 0 #fff, 0 0 2px #fff';
+        this.overlayTopMsg.style.letterSpacing = '2px';
+        this.overlayTopMsg.style.userSelect = 'none';
+        this.overlayTopMsg.style.animation = 'shake 0.5s infinite alternate';
+        this.overlay.appendChild(this.overlayTopMsg);
+
+        // CSS 애니메이션(흔들림 효과) 추가
+        const style = document.createElement('style');
+        style.innerHTML = `
+@keyframes shake {
+  0% { transform: translateX(-50%) rotate(-2deg); }
+  100% { transform: translateX(-50%) rotate(2deg); }
+}`;
+        document.head.appendChild(style);
+
+        // 오버레이 중앙 카운트다운
+        this.overlayCountdown = document.createElement('div');
+        this.overlayCountdown.innerText = '3';
+        this.overlayCountdown.style.fontSize = '150px';
+        this.overlayCountdown.style.fontWeight = 'bold';
+        this.overlayCountdown.style.color = '#000000';
+        this.overlayCountdown.style.textShadow = '2px 2px 8px #000';
+        this.overlayCountdown.style.marginBottom = '0';
+        this.overlayCountdown.style.marginTop = '0';
+        this.overlay.appendChild(this.overlayCountdown);
+
+        document.body.appendChild(this.overlay);
+
+        // 피격 효과 빨간 화면
+        this.hitEffect = document.createElement('div');
+        this.hitEffect.style.position = 'fixed';
+        this.hitEffect.style.top = '0';
+        this.hitEffect.style.left = '0';
+        this.hitEffect.style.width = '100vw';
+        this.hitEffect.style.height = '100vh';
+        this.hitEffect.style.backgroundColor = 'rgba(255, 0, 0, 0.25)';
+        this.hitEffect.style.zIndex = '998';
+        this.hitEffect.style.pointerEvents = 'none';
+        this.hitEffect.style.opacity = '0';
+        this.hitEffect.style.transition = 'opacity 0.1s ease-out';
+        document.body.appendChild(this.hitEffect);
+
+        this.countdownTimer = null; // New variable
+
         this.InitInput_();
       }
     }
@@ -58,11 +129,24 @@ export const player = (() => {
         this.hpUI.updateHP(this.hp_);
       }
 
+      // 피격 효과
+      if (this.hitEffect) {
+        this.hitEffect.style.opacity = '1';
+        setTimeout(() => {
+          this.hitEffect.style.opacity = '0';
+        }, 100); // 0.1초 동안 표시
+      }
+
       if (this.hp_ === 0) {
         this.isDead_ = true; // 죽음 상태로 설정
         this.SetAnimation_('Death'); // Death 애니메이션 재생
         this.DisableInput_(); // 키 입력 비활성화
         this.respawnTimer_ = this.respawnDelay_; // 리스폰 타이머 초기화
+
+        if (this.overlay) {
+          this.overlay.style.visibility = 'visible';
+          this.startCountdown();
+        }
       }
     }
 
@@ -230,7 +314,9 @@ export const player = (() => {
     Respawn_() {
       this.hp_ = 100; // 체력 초기화
       this.isDead_ = false; // 죽음 상태 해제
-      this.hpUI.updateHP(this.hp_); // HPUI 업데이트
+      if (this.hpUI) {
+        this.hpUI.updateHP(this.hp_); // HPUI 업데이트
+      }
       this.InitInput_(); // 입력 활성화
       this.SetAnimation_('Idle'); // Idle 애니메이션으로 설정
       if (this.params_.getRespawnPosition) {
@@ -238,6 +324,14 @@ export const player = (() => {
         this.SetPosition([respawnPosition.x, respawnPosition.y, respawnPosition.z]);
       } else {
         this.SetPosition([0, 0, 0]); // Fallback to default position
+      }
+
+      if (this.overlay) {
+        this.overlay.style.visibility = 'hidden';
+      }
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer);
+        this.countdownTimer = null;
       }
     }
 
@@ -260,6 +354,20 @@ export const player = (() => {
 
     SetRemoteAnimation(animationName) {
       this.SetAnimation_(animationName);
+    }
+
+    startCountdown() {
+      let count = Math.floor(this.respawnDelay_);
+      this.overlayCountdown.innerText = count;
+
+      this.countdownTimer = setInterval(() => {
+        count--;
+        this.overlayCountdown.innerText = count;
+        if (count <= 0) {
+          clearInterval(this.countdownTimer);
+          this.countdownTimer = null;
+        }
+      }, 1000);
     }
 
     UpdateDebugVisuals() {
@@ -364,33 +472,10 @@ export const player = (() => {
               if (isOnTop) continue; // 오브젝트 위에 있으면 X/Z 이동 허용
             }
 
+            // 충돌 발생 시 이전 위치로 되돌리고 Y 속도 0으로 설정
+            newPosition.copy(this.position_);
+            this.velocityY_ = 0;
             canMove = false;
-            // X와 Z 방향을 개별적으로 테스트
-            let canMoveX = true;
-            let canMoveZ = true;
-
-            // X 방향 테스트
-            const tempBoxX = this.boundingBox_.clone();
-            tempBoxX.translate(new THREE.Vector3(rollMove.x, this.velocityY_ * timeElapsed, 0));
-            if (tempBoxX.intersectsBox(collidable.boundingBox)) {
-              canMoveX = false;
-            }
-
-            // Z 방향 테스트
-            const tempBoxZ = this.boundingBox_.clone();
-            tempBoxZ.translate(new THREE.Vector3(0, this.velocityY_ * timeElapsed, rollMove.z));
-            if (tempBoxZ.intersectsBox(collidable.boundingBox)) {
-              canMoveZ = false;
-            }
-
-            // 슬라이딩: 충돌하지 않는 방향으로만 이동
-            if (!canMoveX && canMoveZ) {
-              adjustedRollMove.x = 0; // X 방향 이동 차단
-            } else if (canMoveX && !canMoveZ) {
-              adjustedRollMove.z = 0; // Z 방향 이동 차단
-            } else {
-              adjustedRollMove.set(0, 0, 0); // 둘 다 충돌 시 이동 차단
-            }
             break; // 첫 번째 충돌 처리 후 종료
           }
         }
@@ -470,33 +555,10 @@ export const player = (() => {
             if (boxMaxY <= this.position_.y + this.maxStepHeight_ && boxMaxY > this.position_.y) {
               stepUpHeight = Math.max(stepUpHeight, boxMaxY - this.position_.y);
             } else {
+              // 충돌 발생 시 이전 위치로 되돌리고 Y 속도 0으로 설정
+              newPosition.copy(this.position_);
+              this.velocityY_ = 0;
               canMove = false;
-              // X와 Z 방향을 개별적으로 테스트
-              let canMoveX = true;
-              let canMoveZ = true;
-
-              // X 방향 테스트
-              const tempBoxX = this.boundingBox_.clone();
-              tempBoxX.translate(new THREE.Vector3(velocity.x, this.velocityY_ * timeElapsed, 0));
-              if (tempBoxX.intersectsBox(collidable.boundingBox)) {
-                canMoveX = false;
-              }
-
-              // Z 방향 테스트
-              const tempBoxZ = this.boundingBox_.clone();
-              tempBoxZ.translate(new THREE.Vector3(0, this.velocityY_ * timeElapsed, velocity.z));
-              if (tempBoxZ.intersectsBox(collidable.boundingBox)) {
-                canMoveZ = false;
-              }
-
-              // 슬라이딩: 충돌하지 않는 방향으로만 이동
-              if (!canMoveX && canMoveZ) {
-                adjustedVelocity.x = 0; // X 방향 이동 차단
-              } else if (canMoveX && !canMoveZ) {
-                adjustedVelocity.z = 0; // Z 방향 이동 차단
-              } else {
-                adjustedVelocity.set(0, 0, 0); // 둘 다 충돌 시 이동 차단
-              }
               break;
             }
           }
