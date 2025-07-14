@@ -130,7 +130,30 @@ export class GameStage3 {
   getRandomPosition() {
     const x = Math.random() * 80 - 40;
     const z = Math.random() * 80 - 40;
-    return new THREE.Vector3(x, 0.5, z);
+    let y = 0.5; // Default y position
+
+    const collidables = this.npc_.GetCollidables();
+    const checkPosition = new THREE.Vector3(x, 100, z); // Check from a high position
+    const raycaster = new THREE.Raycaster(checkPosition, new THREE.Vector3(0, -1, 0));
+
+    let highestY = -Infinity;
+    let objectFound = false;
+
+    for (const collidable of collidables) {
+      const intersection = raycaster.intersectBox(collidable.boundingBox);
+      if (intersection) {
+        if (intersection.point.y > highestY) {
+          highestY = intersection.point.y;
+          objectFound = true;
+        }
+      }
+    }
+
+    if (objectFound) {
+      y = highestY + 0.1; // Place slightly above the object
+    }
+
+    return new THREE.Vector3(x, y, z);
   }
 
   CreateLocalPlayer() {
