@@ -27,12 +27,20 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.on('createRoom', (maxPlayers) => {
+  socket.on('createRoom', (roomSettings) => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    rooms[roomId] = { players: [{ id: socket.id, ready: false, character: 'Knight_Male' }], gameState: {}, maxPlayers: maxPlayers };
+    const { map, maxPlayers, visibility, roundTime } = roomSettings;
+    rooms[roomId] = {
+      players: [{ id: socket.id, ready: false, character: 'Knight_Male' }],
+      gameState: {},
+      map: map,
+      maxPlayers: maxPlayers,
+      visibility: visibility,
+      roundTime: roundTime
+    };
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access
-    console.log(`Room created: ${roomId} by ${socket.id} with max players: ${maxPlayers}`);
+    console.log(`Room created: ${roomId} by ${socket.id} with settings:`, roomSettings);
     socket.emit('roomCreated', roomId);
     updateRoomPlayers(roomId);
   });

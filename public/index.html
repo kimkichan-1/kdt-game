@@ -210,6 +210,37 @@
     </div>
   </div>
 
+  <!-- Create Room Popup -->
+  <div id="createRoomSettingsPopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <h2>방 생성 설정</h2>
+      <div style="margin-bottom: 10px;">
+        <label for="mapSelect">맵 선택:</label>
+        <select id="mapSelect" style="padding: 5px; font-size: 16px;">
+          <option value="map1">맵 1</option>
+          <option value="map2">맵 2</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 10px;">
+        <label for="maxPlayersCreate">최대 인원:</label>
+        <input type="number" id="maxPlayersCreate" value="2" min="2" max="8" style="padding: 5px; font-size: 16px; width: 60px;">
+      </div>
+      <div style="margin-bottom: 10px;">
+        <label for="roomVisibility">방 공개 여부:</label>
+        <select id="roomVisibility" style="padding: 5px; font-size: 16px;">
+          <option value="public">공개</option>
+          <option value="private">비밀</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label for="roundTime">라운드 시간 (초):</label>
+        <input type="number" id="roundTime" value="180" min="60" max="600" style="padding: 5px; font-size: 16px; width: 80px;">
+      </div>
+      <button id="createRoomConfirmButton">생성</button>
+      <button id="createRoomCancelButton">닫기</button>
+    </div>
+  </div>
+
   <!-- Waiting Room Display -->
   <div id="waitingRoom" style="display: none;">
     <h2>대기 중...</h2>

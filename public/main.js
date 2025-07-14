@@ -339,7 +339,17 @@ const waitingRoom = document.getElementById('waitingRoom');
 const waitingRoomIdDisplay = document.getElementById('waitingRoomIdDisplay');
 const playerList = document.getElementById('playerList');
 const readyButton = document.getElementById('readyButton');
-const maxPlayersInput = document.getElementById('maxPlayersInput');
+// const maxPlayersInput = document.getElementById('maxPlayersInput'); // This input is now part of the create room popup
+
+// New elements for create room popup
+const createRoomSettingsPopup = document.getElementById('createRoomSettingsPopup');
+const mapSelect = document.getElementById('mapSelect');
+const maxPlayersCreate = document.getElementById('maxPlayersCreate');
+const roomVisibility = document.getElementById('roomVisibility');
+const roundTime = document.getElementById('roundTime');
+const createRoomConfirmButton = document.getElementById('createRoomConfirmButton');
+const createRoomCancelButton = document.getElementById('createRoomCancelButton');
+
 
 function updatePlayers(players) {
   playerList.innerHTML = '';
@@ -351,14 +361,32 @@ function updatePlayers(players) {
 }
 
 createRoomButton.addEventListener('click', () => {
-  const maxPlayers = parseInt(maxPlayersInput.value, 10);
+  createRoomSettingsPopup.style.display = 'flex'; // Show create room settings popup
+});
+
+createRoomConfirmButton.addEventListener('click', () => {
+  const selectedMap = mapSelect.value;
+  const maxPlayers = parseInt(maxPlayersCreate.value, 10);
+  const visibility = roomVisibility.value;
+  const roundDuration = parseInt(roundTime.value, 10);
+
   if (isNaN(maxPlayers) || maxPlayers < 2 || maxPlayers > 8) {
     alert('최대 인원은 2에서 8 사이의 숫자로 설정해주세요.');
     return;
   }
+  if (isNaN(roundDuration) || roundDuration < 60 || roundDuration > 600) {
+    alert('라운드 시간은 60초에서 600초 사이로 설정해주세요.');
+    return;
+  }
+
+  createRoomSettingsPopup.style.display = 'none'; // Hide popup
   menu.style.display = 'none';
   waitingRoom.style.display = 'flex'; // Show waiting room
-  socket.emit('createRoom', maxPlayers);
+  socket.emit('createRoom', { map: selectedMap, maxPlayers: maxPlayers, visibility: visibility, roundTime: roundDuration });
+});
+
+createRoomCancelButton.addEventListener('click', () => {
+  createRoomSettingsPopup.style.display = 'none'; // Hide popup
 });
 
 joinRoomMainButton.addEventListener('click', () => {
