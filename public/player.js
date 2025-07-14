@@ -473,9 +473,35 @@ export const player = (() => {
             }
 
             // 충돌 발생 시 이전 위치로 되돌리고 Y 속도 0으로 설정
-            newPosition.copy(this.position_);
-            this.velocityY_ = 0;
+            // newPosition.copy(this.position_);
+            // this.velocityY_ = 0;
             canMove = false;
+            // X와 Z 방향을 개별적으로 테스트
+            let canMoveX = true;
+            let canMoveZ = true;
+
+            // X 방향 테스트
+            const tempBoxX = this.boundingBox_.clone();
+            tempBoxX.translate(new THREE.Vector3(rollMove.x, this.velocityY_ * timeElapsed, 0));
+            if (tempBoxX.intersectsBox(collidable.boundingBox)) {
+              canMoveX = false;
+            }
+
+            // Z 방향 테스트
+            const tempBoxZ = this.boundingBox_.clone();
+            tempBoxZ.translate(new THREE.Vector3(0, this.velocityY_ * timeElapsed, rollMove.z));
+            if (tempBoxZ.intersectsBox(collidable.boundingBox)) {
+              canMoveZ = false;
+            }
+
+            // 슬라이딩: 충돌하지 않는 방향으로만 이동
+            if (!canMoveX && canMoveZ) {
+              adjustedRollMove.x = 0; // X 방향 이동 차단
+            } else if (canMoveX && !canMoveZ) {
+              adjustedRollMove.z = 0; // Z 방향 이동 차단
+            } else {
+              adjustedRollMove.set(0, 0, 0); // 둘 다 충돌 시 이동 차단
+            }
             break; // 첫 번째 충돌 처리 후 종료
           }
         }
@@ -556,9 +582,35 @@ export const player = (() => {
               stepUpHeight = Math.max(stepUpHeight, boxMaxY - this.position_.y);
             } else {
               // 충돌 발생 시 이전 위치로 되돌리고 Y 속도 0으로 설정
-              newPosition.copy(this.position_);
-              this.velocityY_ = 0;
+              // newPosition.copy(this.position_);
+              // this.velocityY_ = 0;
               canMove = false;
+              // X와 Z 방향을 개별적으로 테스트
+              let canMoveX = true;
+              let canMoveZ = true;
+
+              // X 방향 테스트
+              const tempBoxX = this.boundingBox_.clone();
+              tempBoxX.translate(new THREE.Vector3(velocity.x, this.velocityY_ * timeElapsed, 0));
+              if (tempBoxX.intersectsBox(collidable.boundingBox)) {
+                canMoveX = false;
+              }
+
+              // Z 방향 테스트
+              const tempBoxZ = this.boundingBox_.clone();
+              tempBoxZ.translate(new THREE.Vector3(0, this.velocityY_ * timeElapsed, velocity.z));
+              if (tempBoxZ.intersectsBox(collidable.boundingBox)) {
+                canMoveZ = false;
+              }
+
+              // 슬라이딩: 충돌하지 않는 방향으로만 이동
+              if (!canMoveX && canMoveZ) {
+                adjustedVelocity.x = 0; // X 방향 이동 차단
+              } else if (canMoveX && !canMoveZ) {
+                adjustedVelocity.z = 0; // Z 방향 이동 차단
+              } else {
+                adjustedVelocity.set(0, 0, 0); // 둘 다 충돌 시 이동 차단
+              }
               break;
             }
           }
