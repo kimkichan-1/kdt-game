@@ -1,1 +1,1 @@
-Feat: Update character names in index.html
+Refactor: Adjust character card height and grid columns
