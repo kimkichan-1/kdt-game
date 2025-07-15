@@ -1,1 +1,1 @@
-Refactor: Remove max players setting from main screen
+Remove bald character
