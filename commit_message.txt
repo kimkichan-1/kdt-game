@@ -1,1 +1,1 @@
-Refactor: Adjust character grid columns in media query
+Refactor: Adjust character grid wrapper min-width for 5 columns
