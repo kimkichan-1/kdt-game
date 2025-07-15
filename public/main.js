@@ -239,7 +239,7 @@ export class GameStage3 {
           scene: this.scene,
           character: remotePlayerData.character,
           isRemote: true,
-          hpUI: new hp.HPUI(this.scene, this.renderer, localPlayerData ? localPlayerData.nickname : this.localPlayerId), // HPUI 인스턴스 생성 및 전달
+          hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname) // 원격 플레이어 HPUI 생성
         });
         this.players[data.playerId] = otherPlayer;
       }
