@@ -1,1 +1,1 @@
-Fix: 캐릭터 텍스처가 정상적으로 표시되도록 수정
+Fix: Update glTF paths for character models
