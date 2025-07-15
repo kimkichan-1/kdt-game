@@ -1,1 +1,1 @@
-Refactor: Adjust character card height and grid columns
+Feat: Replace Zombie_Female with Zombie_Male and add Cow character
