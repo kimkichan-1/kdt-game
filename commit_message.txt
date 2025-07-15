@@ -1,1 +1,1 @@
-Fix: Update glTF paths for character models
+Feat: Update character names in index.html
