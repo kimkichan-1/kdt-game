@@ -283,14 +283,16 @@ export const player = (() => {
 
     SetAnimation_(name) {
       if (this.currentAnimationName_ === name) return;
-      if (this.isDead_ && name !== 'Death') return; // 죽음 상태일 때는 Death 애니메이션만 허용
+      if (this.isDead_ && name !== 'Death') return;
 
       this.currentAnimationName_ = name;
       if (this.currentAction_) {
         this.currentAction_.fadeOut(0.3);
       }
-      this.currentAction_ = this.animations_[name];
-      if (this.currentAction_) {
+
+      const newAction = this.animations_[name];
+      if (newAction) {
+        this.currentAction_ = newAction;
         this.currentAction_.reset().fadeIn(0.3).play();
         if (name === 'Jump') {
           this.currentAction_.setLoop(THREE.LoopOnce);
@@ -302,12 +304,19 @@ export const player = (() => {
           this.currentAction_.clampWhenFinished = true;
           this.currentAction_.time = 0.0;
           this.currentAction_.timeScale = 1.2;
-        } else if (name === 'Death') { // Death 애니메이션은 한 번만 재생
+        } else if (name === 'Death') {
           this.currentAction_.setLoop(THREE.LoopOnce);
           this.currentAction_.clampWhenFinished = true;
         } else {
           this.currentAction_.timeScale = 1.0;
         }
+      } else {
+        console.warn(`Animation "${name}" not found for character. Falling back to Idle.`);
+        this.currentAction_ = this.animations_['Idle']; // Fallback to Idle
+        if (this.currentAction_) {
+          this.currentAction_.reset().fadeIn(0.3).play();
+        }
+        this.currentAnimationName_ = 'Idle'; // Update current animation name to Idle
       }
     }
 
