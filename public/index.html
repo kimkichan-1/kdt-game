@@ -257,6 +257,674 @@
     justify-content: center;
   }
   </style>
+  <style id="character-popup-styles">
+    /* 기본 스타일: HTML과 body를 전체 화면으로 설정 */
+    html, body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Orbitron', sans-serif;
+      background: #0f0f0f; /* Darker battle arena base */
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+    /* body: 전체 화면 설정 및 오버플로우 숨김 */
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+      position: relative;
+    }
+    /* 배경 이미지: 싸움터 테마의 배경 */
+    .bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1558008258-3256797b43f3'); /* Neon-lit coliseum */
+      background-size: cover;
+      background-position: center;
+      filter: blur(6px) brightness(0.65);
+      z-index: 1;
+      opacity: 0.85;
+    }
+    /* 메인 레이아웃: 캐릭터 선택창과 미리보기 패널, 더 위로 이동 */
+    .main-layout {
+      position: absolute;
+      left: 50%;
+      top: 50%; /* Moved higher from 60% */
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      z-index: 2;
+      gap: 60px;
+      width: 95vw;
+      max-width: 1500px;
+      min-width: 1000px;
+      justify-content: center;
+    }
+    /* 캐릭터 선택창 외곽: 금속 텍스처와 네온 테두리 */
+    .character-grid-wrapper {
+      background: linear-gradient(135deg, #222222, #111111);
+      border-radius: 18px;
+      box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.1);
+      padding: 30px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-height: 85vh;
+      overflow-y: auto;
+      min-width: 500px;
+      border: 4px solid;
+      border-image: linear-gradient(45deg, #ff2e2e, #00d4ff) 1;
+    }
+    /* 캐릭터 그리드: 4열로 배치, 스크롤 가능 */
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 110px);
+      gap: 20px 26px;
+      background: transparent;
+      padding: 0;
+      z-index: 2;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    /* 개별 캐릭터 카드: 금속적이고 전투적인 스타일 */
+    .character {
+      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+      border: 3px solid #666;
+      border-radius: 12px;
+      width: 100px;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      cursor: pointer;
+      transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+      position: relative;
+      box-sizing: border-box;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+    /* 캐릭터 카드 호버: 네온 글로우와 약간의 확대 */
+    .character:hover {
+      border: 3px solid #ff2e2e;
+      box-shadow: 0 0 20px #ff2e2ecc, inset 0 0 10px #ff2e2e50;
+      transform: scale(1.1) translateY(-5px) rotate(2deg);
+    }
+    /* 선택된 캐릭터: 전기적인 블루 글로우 */
+    .character.selected {
+      border: 4px solid #00d4ff;
+      box-shadow: 0 0 30px #00d4ffcc, inset 0 0 12px #00d4ff50;
+      transform: scale(1.05);
+      z-index: 3;
+      animation: pulse 1.5s infinite;
+    }
+    /* 펄스 애니메이션: 선택된 캐릭터 강조 */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 30px #00d4ffcc; }
+      50% { box-shadow: 0 0 40px #00d4ff; }
+      100% { box-shadow: 0 0 30px #00d4ffcc; }
+    }
+    /* 캐릭터 이미지: 전투적인 썸네일 스타일 */
+    .character img {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #0a0a0a;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      border: 1px solid #ff2e2e60;
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+    /* 캐릭터 이름: 네온 텍스트와 금속 배경 */
+    .character-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      color: #fff;
+      background: linear-gradient(145deg, #3a3a3a, #1a1a1a);
+      border-radius: 6px;
+      padding: 5px 12px;
+      margin-top: 2px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 6px #ff2e2ecc;
+    }
+    /* 미리보기 패널: 홀로그램 스타일의 전투 준비 영역 */
+    .preview-panel {
+      min-width: 520px;
+      max-width: 600px;
+      background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.95));
+      border-radius: 18px;
+      box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7);
+      padding: 40px 20px 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      border: 4px solid;
+      border-image: linear-gradient(45deg, #00d4ff, #b300ff) 1;
+    }
+    /* 미리보기 캔버스 영역: 3D 모델 표시 */
+    .preview-image-area {
+      width: 320px;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: rgba(66, 165, 190, 0.8);
+      border-radius: 14px;
+      box-shadow: 0 6px 25px rgba(168, 26, 26, 0.7), inset 0 0 12px #00d4ff60;
+      overflow: hidden;
+    }
+    /* 캔버스: 전체 영역 채움 */
+    .preview-image-area canvas {
+      width: 100%;
+      height: 100%;
+    }
+    /* 미리보기 캐릭터 이름: 네온 글로우 텍스트 */
+    .preview-character-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 0 0 12px #00d4ff, 0 0 25px #00d4ffcc;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    /* 닉네임 라벨: 전투적인 텍스트 스타일 */
+    .nickname-label {
+      font-family: 'Bebas Neue', sans-serif;
+      color: #fff;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      margin-top: 4px;
+      text-shadow: 0 0 10px #b300ffcc;
+      align-self: flex-start;
+      letter-spacing: 1.2px;
+    }
+    /* 닉네임 입력창: 네온 테마 입력창 */
+    .nickname-input {
+      width: 100%;
+      max-width: 280px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid #00d4ff80;
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    /* 닉네임 입력창 포커스: 네온 글로우 강조 */
+    .nickname-input:focus {
+      border: 2px solid #00d4ff;
+      box-shadow: 0 0 15px #00d4ff;
+      background: rgba(0, 0, 0, 0.9);
+    }
+    /* 입장 버튼: 불타는 전투 버튼 */
+    .enter-btn {
+      min-width: 120px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      cursor: pointer;
+      background: linear-gradient(45deg, #ff2e2e, #b300ff);
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 20px #ff2e2ecc;
+      animation: buttonPulse 2s infinite;
+    }
+    /* 버튼 펄스 애니메이션 */
+    @keyframes buttonPulse {
+      0% { box-shadow: 0 0 20px #ff2e2ecc; }
+      50% { box-shadow: 0 0 30px #ff2e2e; }
+      100% { box-shadow: 0 0 20px #ff2e2ecc; }
+    }
+    /* 입장 버튼 호버: 흔들림과 밝기 증가 */
+    .enter-btn:hover {
+      background: linear-gradient(45deg, #ff4f4f, #cc00ff);
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 0 25px #ff2e2e;
+      animation: shake 0.3s;
+    }
+    /* 흔들림 애니메이션 */
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+    /* 모달 배경: 전투적인 반투명 배경 */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      justify-content: center;
+      align-items: center;
+    }
+    /* 모달 활성화: 표시 설정 */
+    .modal-bg.active {
+      display: flex;
+    }
+    /* 모달 박스: 전투 손상 스타일 */
+    .modal-box {
+      background: linear-gradient(135deg, #222222, #111111);
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px #ff2e2e60;
+      padding: 30px 30px 22px 30px;
+      min-width: 280px;
+      max-width: 90vw;
+      text-align: center;
+      position: relative;
+      z-index: 101;
+      animation: popIn 0.2s;
+      border: 3px solid #ff2e2e;
+    }
+    /* 모달 등장 애니메이션 */
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0.6; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    /* 모달 캐릭터 이름: 네온 텍스트 */
+    .modal-character-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #fff;
+      text-shadow: 0 0 10px #00d4ffcc;
+      text-transform: uppercase;
+    }
+    /* 모달 질문: 전투적인 텍스트 */
+    .modal-question {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      margin-bottom: 22px;
+      color: #ddd;
+      text-shadow: 0 0 6px #ff2e2e60;
+    }
+    /* 모달 버튼 컨테이너: 버튼 그룹 */
+    .modal-btns {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+    }
+    /* 모달 버튼: 기본 스타일 */
+    .modal-btn {
+      min-width: 90px;
+      padding: 12px 22px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      cursor: pointer;
+      background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+      color: #fff;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      text-transform: uppercase;
+    }
+    /* 모달 확인 버튼: 불타는 스타일 */
+    .modal-btn.confirm {
+      background: linear-gradient(45deg, #ff2e2e, #b300ff);
+      box-shadow: 0 0 12px #ff2e2ecc;
+    }
+    /* 모달 취소 버튼 호버 */
+    .modal-btn.cancel:hover {
+      background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+      transform: scale(1.08);
+      box-shadow: 0 0 15px #00d4ffcc;
+    }
+    /* 모달 확인 버튼 호버 */
+    .modal-btn.confirm:hover {
+      background: linear-gradient(45deg, #ff4f4f, #cc00ff);
+      transform: scale(1.08);
+      box-shadow: 0 0 20px #ff2e2e;
+      animation: shake 0.3s;
+    }
+    /* 반응형: 화면 너비 1200px 이하 */
+    @media (max-width: 1200px) {
+      .main-layout {
+        gap: 24px;
+        min-width: 800px;
+      }
+      .character-grid-wrapper { 
+        min-width: 360px;
+        padding: 20px 10px; 
+      }
+      .preview-panel { 
+        min-width: 300px;
+        padding: 24px 10px 20px 10px;
+      }
+      .preview-image-area { 
+        width: 180px;
+        height: 240px;
+      }
+      .preview-character-name {
+        font-size: 1.5rem;
+      }
+      .nickname-input {
+        max-width: 180px;
+        font-size: 1rem;
+      }
+      .enter-btn {
+        min-width: 90px;
+        padding: 10px 20px;
+        font-size: 1.2rem;
+      }
+    }
+    /* 반응형: 화면 너비 900px 이하 */
+    @media (max-width: 900px) {
+      .main-layout {
+        flex-direction: column;
+        align-items: center;
+        min-width: 0;
+        width: 100vw;
+        gap: 24px;
+        top: 55%; /* Moved higher from 65% */
+        left: 50%;
+        transform: translate(-50%, 0);
+      }
+      .character-grid-wrapper { 
+        margin-bottom: 20px; 
+      }
+      .character-grid {
+        grid-template-columns: repeat(3, 100px);
+      }
+      .character {
+        width: 90px;
+        height: 120px;
+      }
+      .character img {
+        width: 70px;
+        height: 70px;
+      }
+      .character-name {
+        font-size: 1rem;
+      }
+      .preview-panel {
+        min-width: 280px;
+        padding: 20px 8px 16px 8px;
+      }
+      .nickname-input {
+        max-width: 160px;
+      }
+    }
+  </style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333333;
+    background-image: url('main-image.png');
+    background-size: 1540px auto;
+    background-position: center 0px;
+    background-repeat: no-repeat;
+  }
+  #menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 수직 중앙 정렬 */
+    align-items: center;     /* 수평 중앙 정렬 */
+    z-index: 10;
+  }
+  #menu h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #fffb02;
+  }
+  #createRoomButton, #joinRoomMainButton, #popupJoinButton, #popupCloseButton {
+    padding: 15px 30px;
+    font-size: 24px;
+    background-color: #d97d3d;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    margin: 5px; /* Added margin for spacing */
+  }
+  #createRoomButton:hover, #joinRoomMainButton:hover, #popupJoinButton:hover, #popupCloseButton:hover {
+    background-color: #b86b34;
+    transform: scale(1.05);
+  }
+  #controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #d97d3d;
+    display: none; /* Hidden by default */
+  }
+  #container {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Popup styles */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .popup-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    color: #333;
+    width: 600px; /* Increased width */
+    max-width: 90%; /* Max width for responsiveness */
+  }
+  .popup-content input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 200px;
+  }
+
+  /* New styles for map selection */
+  #mapSelectionContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  .map-thumbnail {
+    border: 3px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    width: 200px; /* Fixed width for thumbnails */
+    height: 150px; /* Fixed height for thumbnails */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Align text to bottom */
+    padding-bottom: 5px;
+  }
+  .map-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  .map-thumbnail p {
+    position: relative;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    margin: 0;
+  }
+  .map-thumbnail.selected {
+    border-color: #d97d3d;
+    box-shadow: 0 0 10px rgba(217, 125, 61, 0.8);
+  }
+  .map-thumbnail:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .map-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    z-index: 3;
+  }
+
+  /* Waiting Room styles */
+  #waitingRoom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 50; /* Between menu and game */
+    display: none; /* Hidden by default */
+  }
+  #waitingRoom h2 {
+    font-size: 36px;
+    margin-bottom: 15px;
+  }
+  #waitingRoomIdDisplay {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fffb02;
+    margin-bottom: 10px;
+  }
+  /* HP Bar UI styles */
+  .hp-bar-container {
+    position: absolute;
+    z-index: 200;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #235280;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0px 8px #2228;
+    padding: 6px 16px 6px 6px;
+    height: 60px;
+    min-width: 250px;
+  }
+  .hp-profile {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    background: #222;
+    object-fit: cover;
+    margin-right: 12px;
+    box-shadow: 0 1px 4px #0008;
+  }
+  .hp-bar-bg {
+    position: relative;
+    width: 170px;
+    height: 20px;
+    background: #1a2a1a;
+    border: 2px solid #444;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-right: 12px;
+  }
+  .hp-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #e22 70%, #f88 100%);
+    transition: width 0.25s;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .hp-number {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #fff;
+    font-size: 15px;
+    text-shadow: 0 0 3px #000, 0 1px 4px #222c;
+    pointer-events: none;
+    transition: left 0.25s;
+  }
+  .hp-name {
+    color: #bfe8ff;
+    font-weight: bold;
+    font-size: 17px;
+    text-shadow: 1px 1px 3px #222c;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .hp-text-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  </style>
 </head>
 <body>
   <div id="menu">
@@ -329,62 +997,232 @@
 
   <!-- Character and Nickname Selection Popup -->
   <div id="characterNicknamePopup" class="popup-overlay" style="display: none;">
-    <div class="popup-content">
-      <h2>캐릭터 및 닉네임 선택</h2>
-      <div style="margin-bottom: 20px;">
-        <label for="nicknameInput" style="font-size: 18px; margin-right: 10px;">닉네임:</label>
-        <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" style="padding: 10px; font-size: 16px; width: 200px;">
+    <div class="popup-content" style="
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      box-shadow: none;
+      color: inherit;
+      width: auto;
+      max-width: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    ">
+      <!-- 메인 레이아웃: 캐릭터 선택창과 미리보기 패널을 포함 -->
+      <div class="main-layout" style="
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        z-index: 2;
+        gap: 60px;
+        width: 95vw;
+        max-width: 1500px;
+        min-width: 1000px;
+        justify-content: center;
+      ">
+        <!-- 캐릭터 선택창: 여러 캐릭터를 그리드로 표시 -->
+        <div class="character-grid-wrapper" style="
+          background: linear-gradient(135deg, #222222, #111111);
+          border-radius: 18px;
+          box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.1);
+          padding: 30px 22px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-height: 85vh;
+          overflow-y: auto;
+          min-width: 500px;
+          border: 4px solid;
+          border-image: linear-gradient(45deg, #ff2e2e, #00d4ff) 1;
+        ">
+          <div class="character-grid" style="
+            display: grid;
+            grid-template-columns: repeat(4, 110px);
+            gap: 20px 26px;
+            background: transparent;
+            padding: 0;
+            z-index: 2;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+          ">
+            <!-- 캐릭터 카드: 각 캐릭터의 이미지와 이름, glTF 경로 포함 -->
+            <div class="character" data-gltf="./resources/char/glTF/Casual_Bald.gltf"><img src="./resources/character/Casual_Bald.png" alt="캐릭터0"><div class="character-name">캐릭터0</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/BlueSoldier_Female.gltf"><img src="./resources/character/BlueSoldier_Female.png" alt="캐릭터1"><div class="character-name">캐릭터1</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Casual_Male.gltf"><img src="./resources/character/Casual_Male.png" alt="캐릭터2"><div class="character-name">캐릭터2</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Casual2_Female.gltf"><img src="./resources/character/Casual2_Female.png" alt="캐릭터3"><div class="character-name">캐릭터3</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Casual3_Female.gltf"><img src="./resources/character/Casual3_Female.png" alt="캐릭터4"><div class="character-name">캐릭터4</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Chef_Hat.gltf"><img src="./resources/character/Chef_Hat.png" alt="캐릭터5"><div class="character-name">캐릭터5</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Cowboy_Female.gltf"><img src="./resources/character/Cowboy_Female.png" alt="캐릭터6"><div class="character-name">캐릭터6</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Doctor_Female_Young.gltf"><img src="./resources/character/Doctor_Female_Young.png" alt="캐릭터7"><div class="character-name">캐릭터7</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Goblin_Female.gltf"><img src="./resources/character/Goblin_Female.png" alt="캐릭터8"><div class="character-name">캐릭터8</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Goblin_Male.gltf"><img src="./resources/character/Goblin_Male.png" alt="캐릭터9"><div class="character-name">캐릭터9</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Kimono_Female.gltf"><img src="./resources/character/Kimono_Female.png" alt="캐릭터10"><div class="character-name">캐릭터10</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Knight_Golden_Male.gltf"><img src="./resources/character/Knight_Golden_Male.png" alt="캐릭터11"><div class="character-name">캐릭터11</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Knight_Male.gltf"><img src="./resources/character/Knight_Male.png" alt="캐릭터12"><div class="character-name">캐릭터12</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Ninja_Male.gltf"><img src="./resources/character/Ninja_Male.png" alt="캐릭터13"><div class="character-name">캐릭터13</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/OldClassy_Male.gltf"><img src="./resources/character/OldClassy_Male.png" alt="캐릭터14"><div class="character-name">캐릭터14</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Pirate_Male.gltf"><img src="./resources/character/Pirate_Male.png" alt="캐릭터15"><div class="character-name">캐릭터15</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Pug.gltf"><img src="./resources/character/Pug.png" alt="캐릭터16"><div class="character-name">캐릭터16</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Soldier_Male.gltf"><img src="./resources/character/Soldier_Male.png" alt="캐릭터17"><div class="character-name">캐릭터17</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Elf.gltf"><img src="./resources/character/Elf.png" alt="캐릭터18"><div class="character-name">캐릭터18</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Suit_Male.gltf"><img src="./resources/character/Suit_Male.png" alt="캐릭터19"><div class="character-name">캐릭터19</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/VikingHelmet.gltf"><img src="./resources/character/VikingHelmet.png" alt="캐릭터20"><div class="character-name">캐릭터20</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Wizard.gltf"><img src="./resources/character/Wizard.png" alt="캐릭터21"><div class="character-name">캐릭터21</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Worker_Female.gltf"><img src="./resources/character/Worker_Female.png" alt="캐릭터22"><div class="character-name">캐릭터22</div></div>
+            <div class="character" data-gltf="./resources/char/glTF/Zombie_Female.gltf"><img src="./resources/character/Zombie_Female.png" alt="캐릭터23"><div class="character-name">캐릭터23</div></div>
+          </div>
+        </div>
+        <!-- 미리보기 패널: 선택된 캐릭터의 3D 모델과 닉네임 입력 -->
+        <div class="preview-panel" style="
+          min-width: 520px;
+          max-width: 600px;
+          background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.95));
+          border-radius: 18px;
+          box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7);
+          padding: 40px 20px 28px 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+          z-index: 2;
+          border: 4px solid;
+          border-image: linear-gradient(45deg, #00d4ff, #b300ff) 1;
+        ">
+          <div class="preview-image-area" id="previewImageArea" style="
+            width: 320px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(66, 165, 190, 0.8);
+            border-radius: 14px;
+            box-shadow: 0 6px 25px rgba(168, 26, 26, 0.7), inset 0 0 12px #00d4ff60;
+            overflow: hidden;
+          ">
+            <canvas id="previewCanvas" style="
+              width: 100%;
+              height: 100%;
+            "></canvas>
+          </div>
+          <div class="preview-character-name" id="previewCharacterName" style="
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 12px #00d4ff, 0 0 25px #00d4ffcc;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+          ">캐릭터0</div>
+          <input type="text" class="nickname-input" id="nicknameInput" maxlength="12" placeholder="닉네임을 입력하세요" style="
+            width: 100%;
+            max-width: 280px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #00d4ff80;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+          ">
+          <button class="modal-btn enter-btn" id="enterBtn" style="
+            min-width: 120px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ff2e2e, #b300ff);
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 20px #ff2e2ecc;
+            animation: buttonPulse 2s infinite;
+          ">입장</button>
+        </div>
       </div>
-      <div style="margin-bottom: 20px;">
-        <label for="charSelectPopup" style="font-size: 18px; margin-right: 10px;">캐릭터 선택:</label>
-        <select id="charSelectPopup" style="font-size: 16px; padding: 5px;">
-            <option value="Knight_Male">Knight (Male)</option>
-            <option value="Knight_Golden_Female">Knight Golden (Female)</option>
-            <option value="Knight_Golden_Male">Knight Golden (Male)</option>
-            <option value="Ninja_Female">Ninja (Female)</option>
-            <option value="Ninja_Male">Ninja (Male)</option>
-            <option value="Viking_Female">Viking (Female)</option>
-            <option value="Viking_Male">Viking (Male)</option>
-            <option value="Wizard">Wizard</option>
-            <option value="Witch">Witch</option>
-            <option value="Elf">Elf</option>
-            <option value="Goblin_Female">Goblin (Female)</option>
-            <option value="Goblin_Male">Goblin (Male)</option>
-            <option value="Zombie_Female">Zombie (Female)</option>
-            <option value="Zombie_Male">Zombie (Male)</option>
-            <option value="Cowboy_Female">Cowboy (Female)</option>
-            <option value="Cowboy_Male">Cowboy (Male)</option>
-            <option value="Pirate_Female">Pirate (Female)</option>
-            <option value="Pirate_Male">Pirate (Male)</option>
-            <option value="Soldier_Female">Soldier (Female)</option>
-            <option value="Soldier_Male">Soldier (Male)</option>
-            <option value="BlueSoldier_Female">Blue Soldier (Female)</option>
-            <option value="BlueSoldier_Male">Blue Soldier (Male)</option>
-            <option value="Doctor_Female_Young">Doctor (Female, Young)</option>
-            <option value="Doctor_Male_Young">Doctor (Male, Young)</option>
-            <option value="Doctor_Female_Old">Doctor (Female, Old)</option>
-            <option value="Doctor_Male_Old">Doctor (Male, Old)</option>
-            <option value="Chef_Female">Chef (Female)</option>
-            <option value="Chef_Male">Chef (Male)</option>
-            <option value="Worker_Female">Worker (Female)</option>
-            <option value="Worker_Male">Worker (Male)</option>
-            <option value="Suit_Female">Suit (Female)</option>
-            <option value="Suit_Male">Suit (Male)</option>
-            <option value="Kimono_Female">Kimono (Female)</option>
-            <option value="Kimono_Male">Kimono (Male)</option>
-            <option value="Casual_Female">Casual (Female)</option>
-            <option value="Casual_Male">Casual (Male)</option>
-            <option value="Casual2_Female">Casual 2 (Female)</option>
-            <option value="Casual2_Male">Casual 2 (Male)</option>
-            <option value="Casual3_Female">Casual 3 (Female)</option>
-            <option value="Casual3_Male">Casual 3 (Male)</option>
-            <option value="OldClassy_Female">Old Classy (Female)</option>
-            <option value="OldClassy_Male">Old Classy (Male)</option>
-            <option value="Pug">Pug</option>
-            <option value="Cow">Cow</option>
-        </select>
+    </div>
+  </div>
+
+  <!-- 모달: 선택 확인 팝업 (현재 사용 안 함) -->
+  <div class="modal-bg" id="modalBg" style="display: none;">
+    <div class="modal-box" style="
+      background: linear-gradient(135deg, #222222, #111111);
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px #ff2e2e60;
+      padding: 30px 30px 22px 30px;
+      min-width: 280px;
+      max-width: 90vw;
+      text-align: center;
+      position: relative;
+      z-index: 101;
+      animation: popIn 0.2s;
+      border: 3px solid #ff2e2e;
+    ">
+      <div class="modal-character-name" id="modalCharacterName" style="
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+        color: #fff;
+        text-shadow: 0 0 10px #00d4ffcc;
+        text-transform: uppercase;
+      "></div>
+      <div class="modal-question" style="
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.2rem;
+        margin-bottom: 22px;
+        color: #ddd;
+        text-shadow: 0 0 6px #ff2e2e60;
+      ">이 캐릭터를 선택하시겠습니까?</div>
+      <div class="modal-btns" style="
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+      ">
+        <button class="modal-btn confirm" id="modalConfirmBtn" style="
+          min-width: 90px;
+          padding: 12px 22px;
+          border-radius: 8px;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.2rem;
+          cursor: pointer;
+          background: linear-gradient(45deg, #ff2e2e, #b300ff);
+          color: #fff;
+          transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+          text-transform: uppercase;
+          box-shadow: 0 0 12px #ff2e2ecc;
+        ">선택</button>
+        <button class="modal-btn cancel" id="modalCancelBtn" style="
+          min-width: 90px;
+          padding: 12px 22px;
+          border-radius: 8px;
+          border: none;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.2rem;
+          cursor: pointer;
+          background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+          color: #fff;
+          transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+          text-transform: uppercase;
+        ">취소</button>
       </div>
-      <button id="enterWaitingRoomButton">입장</button>
     </div>
   </div>
 
@@ -407,5 +1245,144 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="./main.js"></script>
+
+  <!-- Three.js 및 관련 라이브러리: 3D 모델 렌더링 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // DOM 요소 선택: 캐릭터 선택과 미리보기 관련 요소
+    const characters = document.querySelectorAll('.character');
+    const previewCharacterName = document.getElementById('previewCharacterName');
+    const nicknameInput = document.getElementById('nicknameInput');
+    const enterBtn = document.getElementById('enterBtn');
+    let selectedChar = document.querySelector('.character');
+
+    // Three.js 초기화: 3D 렌더링 환경 설정
+    const canvas = document.getElementById('previewCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 320 / 420, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(320, 420);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // 조명 설정: 캐릭터 얼굴을 선명하게 비추기 위한 조명
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(0, 1, 1).normalize();
+    scene.add(directionalLight);
+    const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    frontLight.position.set(0, 1, 2);
+    scene.add(frontLight);
+
+    // 카메라 위치: 캐릭터를 적절히 보기 위한 설정
+    camera.position.set(0, 1, 2.5);
+    camera.lookAt(0, 1, 0);
+
+    // OrbitControls: 마우스 드래그로 모델 회전 제어
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.enableRotate = true;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.5;
+    controls.minPolarAngle = Math.PI / 2;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // glTF 로더 및 애니메이션 믹서 초기화
+    const loader = new THREE.GLTFLoader();
+    let currentModel = null;
+    let mixer = null;
+
+    // 애니메이션 루프: 매 프레임마다 장면 렌더링 및 애니메이션 업데이트
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mixer) mixer.update(0.016);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 모델 로드 함수: 선택된 glTF 파일을 로드하고 장면에 추가
+    function loadModel(gltfPath) {
+      if (currentModel) {
+        scene.remove(currentModel);
+        mixer = null;
+      }
+
+      loader.load(
+        gltfPath,
+        (gltf) => {
+          currentModel = gltf.scene;
+          scene.add(currentModel);
+
+          const box = new THREE.Box3().setFromObject(currentModel);
+          const size = box.getSize(new THREE.Vector3()).length();
+          const center = box.getCenter(new THREE.Vector3());
+          currentModel.position.sub(center);
+          currentModel.scale.set(3.0 / size, 3.0 / size, 3.0 / size);
+          currentModel.position.y = -1.25;
+
+          if (gltf.animations && gltf.animations.length) {
+            mixer = new THREE.AnimationMixer(currentModel);
+            const victoryAnim = gltf.animations.find(anim => anim.name.toLowerCase().includes('victory'));
+            if (victoryAnim) {
+              const action = mixer.clipAction(victoryAnim);
+              action.play();
+            }
+          }
+        },
+        undefined,
+        (error) => {
+          console.error('glTF 로드 오류:', error);
+        }
+      );
+    }
+
+    // 캐릭터 클릭 이벤트: 선택한 캐릭터의 모델과 이름 표시
+    characters.forEach(char => {
+      char.addEventListener('click', () => {
+        characters.forEach(c => c.classList.remove('selected'));
+        char.classList.add('selected');
+        const gltfPath = char.dataset.gltf;
+        const name = char.querySelector('.character-name').textContent;
+        previewCharacterName.textContent = name;
+        loadModel(gltfPath);
+        selectedChar = char;
+      });
+    });
+
+    // 입장 버튼 클릭 이벤트: 선택 정보 저장 후 페이지 이동
+    enterBtn.addEventListener('click', () => {
+      const characterName = previewCharacterName.textContent;
+      const nickname = nicknameInput.value.trim() || 'Guest';
+      localStorage.setItem('selectedCharacter', characterName);
+      localStorage.setItem('nickname', nickname);
+      // window.location.href = 'room.html'; // main.js에서 처리
+      document.getElementById('characterNicknamePopup').style.display = 'none';
+      // main.js에서 이벤트를 발생시켜 선택된 캐릭터와 닉네임을 전달
+      const event = new CustomEvent('characterSelected', {
+        detail: { character: characterName, nickname: nickname }
+      });
+      document.dispatchEvent(event);
+    });
+
+    // 팝업이 열릴 때 초기화 함수
+    function initializeCharacterSelection() {
+      const firstChar = document.querySelector('.character');
+      if (firstChar) {
+        characters.forEach(c => c.classList.remove('selected')); // 모든 선택 해제
+        firstChar.classList.add('selected');
+        previewCharacterName.textContent = firstChar.querySelector('.character-name').textContent;
+        loadModel(firstChar.dataset.gltf);
+        selectedChar = firstChar;
+      }
+    }
+
+    // main.js에서 팝업을 열 때 이 함수를 호출하도록 설정
+    // 예: document.getElementById('characterNicknamePopup').style.display = 'flex'; initializeCharacterSelection();
+  </script>
 </body>
 </html>

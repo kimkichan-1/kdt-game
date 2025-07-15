@@ -345,9 +345,6 @@ const readyButton = document.getElementById('readyButton');
 // New elements for create room popup
 const createRoomSettingsPopup = document.getElementById('createRoomSettingsPopup');
 const characterNicknamePopup = document.getElementById('characterNicknamePopup');
-const nicknameInput = document.getElementById('nicknameInput');
-const charSelectPopup = document.getElementById('charSelectPopup');
-const enterWaitingRoomButton = document.getElementById('enterWaitingRoomButton');
 
 let roomSettings = {}; // Global variable to store room creation settings
 let joinRoomId = null; // Global variable to store room ID for joining
@@ -394,31 +391,31 @@ createRoomConfirmButton.addEventListener('click', () => {
 
   createRoomSettingsPopup.style.display = 'none'; // Hide create room settings popup
   characterNicknamePopup.style.display = 'flex'; // Show character and nickname popup
+  initializeCharacterSelection(); // Initialize the character selection UI
 });
 
 createRoomCancelButton.addEventListener('click', () => {
   createRoomSettingsPopup.style.display = 'none'; // Hide popup
 });
 
-enterWaitingRoomButton.addEventListener('click', () => {
-  const nickname = nicknameInput.value.trim();
-  const selectedCharacter = charSelectPopup.value;
+// Custom event listener for character selection
+document.addEventListener('characterSelected', (event) => {
+  const { character, nickname } = event.detail;
 
   if (!nickname) {
     alert('닉네임을 입력해주세요.');
     return;
   }
 
-  characterNicknamePopup.style.display = 'none'; // Hide character and nickname popup
   menu.style.display = 'none'; // Hide main menu
   waitingRoom.style.display = 'flex'; // Show waiting room
 
   // 방 생성 또는 참가 로직 분기
   if (roomSettings.map) { // 방 생성 흐름
-    socket.emit('createRoom', { ...roomSettings, nickname: nickname, character: selectedCharacter });
+    socket.emit('createRoom', { ...roomSettings, nickname: nickname, character: character });
     roomSettings = {}; // Reset room settings after use
   } else if (joinRoomId) { // 방 참가 흐름
-    socket.emit('joinRoom', joinRoomId, nickname, selectedCharacter);
+    socket.emit('joinRoom', joinRoomId, nickname, character);
     waitingRoomIdDisplay.textContent = `방 ID: ${joinRoomId}`;
     joinRoomId = null; // Reset joinRoomId
   } else {
@@ -485,6 +482,7 @@ popupJoinButton.addEventListener('click', () => {
     joinRoomId = roomIdToJoin; // Store room ID for later use
     joinRoomPopup.style.display = 'none'; // Hide join room popup
     characterNicknamePopup.style.display = 'flex'; // Show character and nickname popup
+    initializeCharacterSelection(); // Initialize the character selection UI
     selectedPublicRoomId = null; // Reset selected room
   } else {
     alert('공개방을 선택하거나 비밀방 코드를 입력해주세요.');
