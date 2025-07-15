@@ -13,7 +13,14 @@ const rooms = {}; // { roomId: { players: [{ id: socket.id, ready: false }], gam
 // Helper function to update all players in a room
 function updateRoomPlayers(roomId) {
   if (rooms[roomId]) {
-    io.to(roomId).emit('updatePlayers', rooms[roomId].players);
+    // Send nickname and character along with player ID and ready status
+    const playersData = rooms[roomId].players.map(p => ({
+      id: p.id,
+      nickname: p.nickname, // Add nickname
+      ready: p.ready,
+      character: p.character // Add character
+    }));
+    io.to(roomId).emit('updatePlayers', playersData);
   }
 }
 
@@ -39,10 +46,11 @@ io.on('connection', (socket) => {
 
   socket.on('createRoom', (roomSettings) => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    const { map, maxPlayers, visibility, roundTime } = roomSettings;
+    const { map, maxPlayers, visibility, roundTime, nickname, character } = roomSettings; // Destructure nickname and character
+
     rooms[roomId] = {
       id: roomId,
-      players: [{ id: socket.id, ready: false, character: 'Knight_Male' }],
+      players: [{ id: socket.id, ready: false, nickname: nickname, character: character }], // Store nickname and character
       gameState: {},
       map: map,
       maxPlayers: maxPlayers,
@@ -56,7 +64,7 @@ io.on('connection', (socket) => {
     updateRoomPlayers(roomId);
   });
 
-  socket.on('joinRoom', (roomId) => {
+  socket.on('joinRoom', (roomId, nickname, character) => { // Receive nickname and character
     if (rooms[roomId]) {
       // Check if player is already in the room
       if (rooms[roomId].players.some(p => p.id === socket.id)) {
@@ -74,7 +82,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false, character: 'Knight_Male' });
+      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character }); // Store nickname and character
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', roomId);
@@ -84,12 +92,12 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('ready', (character) => {
+  socket.on('ready', () => { // No longer receives character
     if (socket.roomId && rooms[socket.roomId]) {
       const playerIndex = rooms[socket.roomId].players.findIndex(p => p.id === socket.id);
       if (playerIndex !== -1) {
         rooms[socket.roomId].players[playerIndex].ready = !rooms[socket.roomId].players[playerIndex].ready;
-        rooms[socket.roomId].players[playerIndex].character = character;
+        // rooms[socket.roomId].players[playerIndex].character = character; // Remove this line
         updateRoomPlayers(socket.roomId);
 
         // Check if all players are ready

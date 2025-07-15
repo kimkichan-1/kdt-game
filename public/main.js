@@ -344,6 +344,14 @@ const readyButton = document.getElementById('readyButton');
 
 // New elements for create room popup
 const createRoomSettingsPopup = document.getElementById('createRoomSettingsPopup');
+const characterNicknamePopup = document.getElementById('characterNicknamePopup');
+const nicknameInput = document.getElementById('nicknameInput');
+const charSelectPopup = document.getElementById('charSelectPopup');
+const enterWaitingRoomButton = document.getElementById('enterWaitingRoomButton');
+
+let roomSettings = {}; // Global variable to store room creation settings
+let joinRoomId = null; // Global variable to store room ID for joining
+
 const mapSelectionContainer = document.getElementById('mapSelectionContainer');
 const mapThumbnails = document.querySelectorAll('.map-thumbnail');
 const maxPlayersCreate = document.getElementById('maxPlayersCreate');
@@ -357,7 +365,7 @@ function updatePlayers(players) {
   playerList.innerHTML = '';
   players.forEach(p => {
     const li = document.createElement('li');
-    li.textContent = `Player ${p.id.substring(0, 4)} ${p.ready ? '(준비)' : '(대기)'}`;
+    li.textContent = `${p.nickname} (${p.id.substring(0, 4)}) ${p.ready ? '(준비)' : '(대기)'}`;
     playerList.appendChild(li);
   });
 }
@@ -382,14 +390,44 @@ createRoomConfirmButton.addEventListener('click', () => {
     return;
   }
 
-  createRoomSettingsPopup.style.display = 'none'; // Hide popup
-  menu.style.display = 'none';
-  waitingRoom.style.display = 'flex'; // Show waiting room
-  socket.emit('createRoom', { map: selectedMap, maxPlayers: maxPlayers, visibility: visibility, roundTime: roundDuration });
+  roomSettings = { map: selectedMap, maxPlayers: maxPlayers, visibility: visibility, roundTime: roundDuration };
+
+  createRoomSettingsPopup.style.display = 'none'; // Hide create room settings popup
+  characterNicknamePopup.style.display = 'flex'; // Show character and nickname popup
 });
 
 createRoomCancelButton.addEventListener('click', () => {
   createRoomSettingsPopup.style.display = 'none'; // Hide popup
+});
+
+enterWaitingRoomButton.addEventListener('click', () => {
+  const nickname = nicknameInput.value.trim();
+  const selectedCharacter = charSelectPopup.value;
+
+  if (!nickname) {
+    alert('닉네임을 입력해주세요.');
+    return;
+  }
+
+  characterNicknamePopup.style.display = 'none'; // Hide character and nickname popup
+  menu.style.display = 'none'; // Hide main menu
+  waitingRoom.style.display = 'flex'; // Show waiting room
+
+  // 방 생성 또는 참가 로직 분기
+  if (roomSettings.map) { // 방 생성 흐름
+    socket.emit('createRoom', { ...roomSettings, nickname: nickname, character: selectedCharacter });
+    roomSettings = {}; // Reset room settings after use
+  } else if (joinRoomId) { // 방 참가 흐름
+    socket.emit('joinRoom', joinRoomId, nickname, selectedCharacter);
+    waitingRoomIdDisplay.textContent = `방 ID: ${joinRoomId}`;
+    joinRoomId = null; // Reset joinRoomId
+  } else {
+    alert('방 생성 또는 참가 정보가 없습니다.');
+    // 에러 처리 또는 초기 화면으로 돌아가는 로직 추가
+    menu.style.display = 'flex';
+    waitingRoom.style.display = 'none';
+    return;
+  }
 });
 
 // Map selection logic
@@ -444,11 +482,9 @@ popupJoinButton.addEventListener('click', () => {
   }
 
   if (roomIdToJoin) {
-    socket.emit('joinRoom', roomIdToJoin);
-    joinRoomPopup.style.display = 'none'; // Hide popup after joining
-    menu.style.display = 'none';
-    waitingRoom.style.display = 'flex'; // Show waiting room while waiting for join confirmation
-    waitingRoomIdDisplay.textContent = `방 ID: ${roomIdToJoin}`;
+    joinRoomId = roomIdToJoin; // Store room ID for later use
+    joinRoomPopup.style.display = 'none'; // Hide join room popup
+    characterNicknamePopup.style.display = 'flex'; // Show character and nickname popup
     selectedPublicRoomId = null; // Reset selected room
   } else {
     alert('공개방을 선택하거나 비밀방 코드를 입력해주세요.');
@@ -460,23 +496,17 @@ popupCloseButton.addEventListener('click', () => {
 });
 
 readyButton.addEventListener('click', () => {
-  const selectedCharacter = document.getElementById('charSelect').value;
-  socket.emit('ready', selectedCharacter);
+  // 닉네임과 캐릭터 정보는 이미 enterWaitingRoomButton에서 서버로 보냈으므로,
+  // 여기서는 단순히 '준비' 상태를 서버에 알립니다.
+  socket.emit('ready');
 });
 
 socket.on('roomCreated', (roomId) => {
   waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
-  // Game starts when another player joins or after a specific event
-  // For now, let's assume game starts immediately for the creator
-  // menu.style.display = 'none'; // Already hidden
-  // waitingRoom.style.display = 'flex'; // Already shown
 });
 
 socket.on('roomJoined', (roomId) => {
   waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
-  // Hide waiting room and show game controls
-  // menu.style.display = 'none'; // Already hidden
-  // waitingRoom.style.display = 'flex'; // Already shown
 });
 
 socket.on('updatePlayers', (players) => {

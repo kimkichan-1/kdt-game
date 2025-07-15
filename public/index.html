@@ -327,14 +327,17 @@
     </div>
   </div>
 
-  <!-- Waiting Room Display -->
-  <div id="waitingRoom" style="display: none;">
-    <h2>대기 중...</h2>
-    <p id="waitingRoomIdDisplay"></p>
-    <p>다른 플레이어를 기다리는 중입니다.</p>
-    <div id="characterSelection" style="margin: 20px;">
-        <label for="charSelect" style="color: white; font-size: 18px; margin-right: 10px;">캐릭터 선택:</label>
-        <select id="charSelect" style="font-size: 16px; padding: 5px;">
+  <!-- Character and Nickname Selection Popup -->
+  <div id="characterNicknamePopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <h2>캐릭터 및 닉네임 선택</h2>
+      <div style="margin-bottom: 20px;">
+        <label for="nicknameInput" style="font-size: 18px; margin-right: 10px;">닉네임:</label>
+        <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" style="padding: 10px; font-size: 16px; width: 200px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label for="charSelectPopup" style="font-size: 18px; margin-right: 10px;">캐릭터 선택:</label>
+        <select id="charSelectPopup" style="font-size: 16px; padding: 5px;">
             <option value="Knight_Male">Knight (Male)</option>
             <option value="Knight_Golden_Female">Knight Golden (Female)</option>
             <option value="Knight_Golden_Male">Knight Golden (Male)</option>
@@ -380,7 +383,16 @@
             <option value="Pug">Pug</option>
             <option value="Cow">Cow</option>
         </select>
+      </div>
+      <button id="enterWaitingRoomButton">입장</button>
     </div>
+  </div>
+
+  <!-- Waiting Room Display -->
+  <div id="waitingRoom" style="display: none;">
+    <h2>대기 중...</h2>
+    <p id="waitingRoomIdDisplay"></p>
+    <p>다른 플레이어를 기다리는 중입니다.</p>
     <ul id="playerList"></ul>
     <button id="readyButton">준비</button>
   </div>
