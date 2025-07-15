@@ -1072,15 +1072,16 @@
 
     // 입장 버튼 클릭 이벤트: 선택 정보 저장 후 페이지 이동
     enterBtn.addEventListener('click', () => {
-      const characterName = previewCharacterName.textContent;
+      const gltfPath = selectedChar.dataset.gltf; // 선택된 캐릭터의 data-gltf 속성 가져오기
+      const characterFileName = gltfPath.substring(gltfPath.lastIndexOf('/') + 1).replace('.gltf', ''); // 파일 이름만 추출 (확장자 제외)
+
       const nickname = nicknameInput.value.trim() || 'Guest';
-      localStorage.setItem('selectedCharacter', characterName);
+      localStorage.setItem('selectedCharacter', characterFileName); // 실제 파일 이름을 저장
       localStorage.setItem('nickname', nickname);
-      // window.location.href = 'room.html'; // main.js에서 처리
+
       document.getElementById('characterNicknamePopup').style.display = 'none';
-      // main.js에서 이벤트를 발생시켜 선택된 캐릭터와 닉네임을 전달
       const event = new CustomEvent('characterSelected', {
-        detail: { character: characterName, nickname: nickname }
+        detail: { character: characterFileName, nickname: nickname } // 파일 이름을 전달
       });
       document.dispatchEvent(event);
     });
