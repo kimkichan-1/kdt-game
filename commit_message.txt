@@ -1,1 +1,1 @@
-Feat: Replace Zombie_Female with Zombie_Male and add Cow character
+Refactor: Adjust character grid columns in media query
