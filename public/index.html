@@ -182,6 +182,13 @@
   .player-slot {
     width: 180px; /* Adjusted width for 4 columns */
     height: 200px; /* Adjusted height */
+    overflow: hidden; /* Hide overflow from canvas */
+  }
+  .player-slot canvas {
+    width: 100px; /* Set canvas size */
+    height: 100px;
+    display: block;
+    margin: 0 auto 5px auto; /* Center canvas and add margin */
     border-radius: 8px;
     display: flex;
     flex-direction: column;
