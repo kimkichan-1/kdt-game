@@ -196,7 +196,7 @@ export class GameStage3 {
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
       character: localPlayerData.character,
-      hpUI: new hp.HPUI(this.scene, this.renderer, `Player ${this.localPlayerId.substring(0, 4)}`), // HPUI 인스턴스 생성 및 전달
+      hpUI: new hp.HPUI(this.scene, this.renderer, localPlayerData.nickname), // HPUI 인스턴스 생성 및 전달
       getRespawnPosition: () => this.getRandomPosition(),
       onLoad: () => {
         const initialPosition = this.getRandomPosition();
