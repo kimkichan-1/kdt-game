@@ -39,14 +39,15 @@ io.on('connection', (socket) => {
       id: room.id,
       players: room.players.length,
       maxPlayers: room.maxPlayers,
-      map: room.map
+      map: room.map,
+      name: room.name // Add room name
     }));
     socket.emit('publicRoomsList', publicRooms);
   });
 
   socket.on('createRoom', (roomSettings) => {
     const roomId = Math.random().toString(36).substring(2, 8); // Simple unique ID
-    const { map, maxPlayers, visibility, roundTime, nickname, character } = roomSettings; // Destructure nickname and character
+    const { map, maxPlayers, visibility, roundTime, nickname, character, roomName } = roomSettings; // Destructure nickname, character, and roomName
 
     rooms[roomId] = {
       id: roomId,
@@ -55,7 +56,8 @@ io.on('connection', (socket) => {
       map: map,
       maxPlayers: maxPlayers,
       visibility: visibility,
-      roundTime: roundTime
+      roundTime: roundTime,
+      name: roomName // Store room name
     };
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access

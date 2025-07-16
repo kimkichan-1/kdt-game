@@ -400,12 +400,20 @@ createRoomButton.addEventListener('click', () => {
   createRoomSettingsPopup.style.display = 'flex'; // Show create room settings popup
 });
 
+const roomNameCreate = document.getElementById('roomNameCreate');
+
 createRoomConfirmButton.addEventListener('click', () => {
   const selectedMapElement = document.querySelector('.map-thumbnail.selected');
   const selectedMap = selectedMapElement ? selectedMapElement.dataset.map : 'map1'; // Default to map1 if none selected
   const maxPlayers = parseInt(maxPlayersCreate.value, 10);
   const visibility = roomVisibility.value;
   const roundDuration = parseInt(roundTime.value, 10);
+  const roomName = roomNameCreate.value.trim();
+
+  if (!roomName) {
+    alert('방 이름을 입력해주세요.');
+    return;
+  }
 
   if (isNaN(maxPlayers) || maxPlayers < 2 || maxPlayers > 8) {
     alert('최대 인원은 2에서 8 사이의 숫자로 설정해주세요.');
@@ -416,7 +424,7 @@ createRoomConfirmButton.addEventListener('click', () => {
     return;
   }
 
-  roomSettings = { map: selectedMap, maxPlayers: maxPlayers, visibility: visibility, roundTime: roundDuration };
+  roomSettings = { map: selectedMap, maxPlayers: maxPlayers, visibility: visibility, roundTime: roundDuration, roomName: roomName };
 
   createRoomSettingsPopup.style.display = 'none'; // Hide create room settings popup
   characterNicknamePopup.style.display = 'flex'; // Show character and nickname popup
@@ -480,7 +488,7 @@ socket.on('publicRoomsList', (rooms) => {
   rooms.forEach(room => {
     const li = document.createElement('li');
     li.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; text-align: left; cursor: pointer; background-color: #f9f9f9;';
-    li.textContent = `방 ID: ${room.id.substring(0, 4)} (인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
+    li.textContent = `방 이름: ${room.name} (ID: ${room.id.substring(0, 4)}, 인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
     li.dataset.roomId = room.id;
     li.addEventListener('click', () => {
       if (selectedPublicRoomId === room.id) {
