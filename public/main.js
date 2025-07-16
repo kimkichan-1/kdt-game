@@ -4,7 +4,6 @@ import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
-import { PlayerSlotRenderer } from './player-slot-renderer.js'; // PlayerSlotRenderer 임포트
 
 const socket = io();
 
@@ -366,7 +365,6 @@ const characterNicknamePopup = document.getElementById('characterNicknamePopup')
 let roomSettings = {}; // Global variable to store room creation settings
 let joinRoomId = null; // Global variable to store room ID for joining
 let isRoomCreator = false; // Track if the current client is the room creator
-let playerSlotRenderers = {}; // To store PlayerSlotRenderer instances
 
 const mapSelectionContainer = document.getElementById('mapSelectionContainer');
 const mapThumbnails = document.querySelectorAll('.map-thumbnail');
@@ -384,13 +382,6 @@ const currentMapImage = document.getElementById('currentMapImage');
 const mapPlaceholderText = document.getElementById('mapPlaceholderText');
 
 function updatePlayers(players, maxPlayers) {
-  // Dispose of old renderers
-  for (const key in playerSlotRenderers) {
-    if (playerSlotRenderers.hasOwnProperty(key)) {
-      playerSlotRenderers[key].dispose();
-      delete playerSlotRenderers[key];
-    }
-  }
   playerSlotsContainer.innerHTML = '';
   const totalSlots = 8; // Always show 8 slots
 
@@ -403,21 +394,11 @@ function updatePlayers(players, maxPlayers) {
       if (playerInfo) {
         playerSlot.style.border = '2px solid #4CAF50';
         playerSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = 100; // Set canvas size
-        canvas.height = 100;
-        canvas.style.marginBottom = '5px';
-        playerSlot.appendChild(canvas);
-
-        playerSlot.innerHTML += `
+        playerSlot.innerHTML = `
+          <img src="./resources/character/${playerInfo.character}.png" alt="${playerInfo.nickname}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 5px;">
           <p style="margin: 0;">${playerInfo.nickname}</p>
           <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
         `;
-        
-        // Initialize PlayerSlotRenderer for this slot
-        playerSlotRenderers[playerInfo.id] = new PlayerSlotRenderer(canvas, playerInfo.character);
-
         if (isRoomCreator) {
           const closeBtn = document.createElement('div');
           closeBtn.classList.add('close-slot-btn');
@@ -455,18 +436,6 @@ function updatePlayers(players, maxPlayers) {
     playerSlotsContainer.appendChild(playerSlot);
   }
 }
-
-// Animation loop for waiting room characters
-function animateWaitingRoom() {
-  requestAnimationFrame(animateWaitingRoom);
-  for (const key in playerSlotRenderers) {
-    if (playerSlotRenderers.hasOwnProperty(key)) {
-      playerSlotRenderers[key].update();
-    }
-  }
-}
-animateWaitingRoom(); // Start the animation loop
-
 
 createRoomButton.addEventListener('click', () => {
   createRoomSettingsPopup.style.display = 'flex'; // Show create room settings popup
@@ -647,13 +616,6 @@ socket.on('updatePlayers', (players, maxPlayers) => {
 socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  // Dispose of all player slot renderers when game starts
-  for (const key in playerSlotRenderers) {
-    if (playerSlotRenderers.hasOwnProperty(key)) {
-      playerSlotRenderers[key].dispose();
-    }
-  }
-  playerSlotRenderers = {}; // Clear the object
   new GameStage3(socket, gameInfo.players, gameInfo.map);
 });
 
