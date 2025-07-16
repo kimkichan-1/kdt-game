@@ -315,6 +315,23 @@
     flex-direction: column;
     justify-content: center;
   }
+  .round-time-btn {
+    padding: 8px 15px;
+    font-size: 16px;
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  .round-time-btn:hover {
+    background-color: #777;
+  }
+  .round-time-btn.selected {
+    background-color: #d97d3d;
+    border-color: #d97d3d;
+  }
   </style>
   <style id="character-popup-styles">
     /* 메인 레이아웃: 캐릭터 선택창과 미리보기 패널, 더 위로 이동 */
@@ -765,14 +782,14 @@
         </select>
       </div>
       <div style="margin-bottom: 20px;">
-        <label for="roundTime">라운드 시간 (초):</label>
-        <select id="roundTime" style="padding: 5px; font-size: 16px;">
-          <option value="120">120초</option>
-          <option value="150">150초</option>
-          <option value="180" selected>180초</option>
-          <option value="210">210초</option>
-          <option value="240">240초</option>
-        </select>
+        <label>라운드 시간 (초):</label>
+        <div id="roundTimeOptions" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 5px;">
+          <button type="button" class="round-time-btn" data-value="120">120초</button>
+          <button type="button" class="round-time-btn" data-value="150">150초</button>
+          <button type="button" class="round-time-btn selected" data-value="180">180초</button>
+          <button type="button" class="round-time-btn" data-value="210">210초</button>
+          <button type="button" class="round-time-btn" data-value="240">240초</button>
+        </div>
       </div>
       <button id="createRoomConfirmButton">생성</button>
       <button id="createRoomCancelButton">닫기</button>
@@ -1276,6 +1293,18 @@
         selectedChar = firstChar;
       }
     }
+
+    // 라운드 시간 버튼 이벤트 리스너
+    const roundTimeButtons = document.querySelectorAll('.round-time-btn');
+    let selectedRoundTime = 180; // 기본값
+
+    roundTimeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        roundTimeButtons.forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        selectedRoundTime = parseInt(button.dataset.value, 10);
+      });
+    });
 
     // main.js에서 팝업을 열 때 이 함수를 호출하도록 설정
     // 예: document.getElementById('characterNicknamePopup').style.display = 'flex'; initializeCharacterSelection();

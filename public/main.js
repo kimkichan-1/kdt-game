@@ -370,7 +370,7 @@ const mapSelectionContainer = document.getElementById('mapSelectionContainer');
 const mapThumbnails = document.querySelectorAll('.map-thumbnail');
 const maxPlayersCreate = document.getElementById('maxPlayersCreate');
 const roomVisibility = document.getElementById('roomVisibility');
-const roundTime = document.getElementById('roundTime');
+
 const createRoomConfirmButton = document.getElementById('createRoomConfirmButton');
 const createRoomCancelButton = document.getElementById('createRoomCancelButton');
 
@@ -443,13 +443,13 @@ createRoomButton.addEventListener('click', () => {
 
 const roomNameCreate = document.getElementById('roomNameCreate');
 
-createRoomConfirmButton.addEventListener('click', () => {
-  const selectedMapElement = document.querySelector('.map-thumbnail.selected');
-  const selectedMap = selectedMapElement ? selectedMapElement.dataset.map : 'map1'; // Default to map1 if none selected
-  const maxPlayers = parseInt(maxPlayersCreate.value, 10);
-  const visibility = roomVisibility.value;
-  const roundDuration = parseInt(roundTime.value, 10);
-  const roomName = roomNameCreate.value.trim();
+  createRoomConfirmButton.addEventListener('click', () => {
+    const selectedMapElement = document.querySelector('.map-thumbnail.selected');
+    const selectedMap = selectedMapElement ? selectedMapElement.dataset.map : 'map1'; // Default to map1 if none selected
+    const maxPlayers = parseInt(maxPlayersCreate.value, 10);
+    const visibility = roomVisibility.value;
+    const roundDuration = parseInt(roundTime.value, 10);
+    const roomName = roomNameCreate.value.trim();
 
   if (!roomName) {
     alert('방 이름을 입력해주세요.');
