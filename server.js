@@ -141,6 +141,24 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('increaseMaxPlayers', () => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const room = rooms[socket.roomId];
+      const roomCreator = room.players[0];
+
+      if (roomCreator.id === socket.id) {
+        if (room.maxPlayers < 8) {
+          room.maxPlayers++;
+          updateRoomPlayers(socket.roomId);
+        } else {
+          socket.emit('roomError', '최대 인원은 8명까지 설정할 수 있습니다.');
+        }
+      } else {
+        socket.emit('roomError', '방장만 인원수를 변경할 수 있습니다.');
+      }
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     if (socket.roomId && rooms[socket.roomId]) {

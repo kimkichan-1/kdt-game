@@ -192,6 +192,26 @@
     text-align: center;
     background-color: rgba(255, 255, 255, 0.1);
     border: 2px dashed #aaa;
+    position: relative; /* For X mark positioning */
+  }
+  .player-slot.closed {
+    background-color: rgba(0, 0, 0, 0.5); /* Darker background for closed slots */
+    border: 2px solid #ff0000; /* Red border for closed slots */
+    cursor: pointer;
+  }
+  .player-slot.closed::after {
+    content: 'X';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 80px;
+    color: #ff0000; /* Red X */
+    font-weight: bold;
+    pointer-events: none; /* Allow click to pass through to the div */
+  }
+  .player-slot.closed:hover {
+    background-color: rgba(0, 0, 0, 0.7); /* Darker on hover */
   }
   #waitingRoom h2 {
     font-size: 36px;

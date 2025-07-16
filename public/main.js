@@ -371,23 +371,35 @@ const mapPlaceholderText = document.getElementById('mapPlaceholderText');
 
 function updatePlayers(players, maxPlayers) {
   playerSlotsContainer.innerHTML = '';
-  for (let i = 0; i < maxPlayers; i++) {
+  const totalSlots = 8; // Always show 8 slots
+
+  for (let i = 0; i < totalSlots; i++) {
     const playerSlot = document.createElement('div');
     playerSlot.classList.add('player-slot');
 
     const playerInfo = players[i];
-    if (playerInfo) {
-      playerSlot.style.border = '2px solid #4CAF50';
-      playerSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-      playerSlot.innerHTML = `
-        <img src="./resources/character/${playerInfo.character}.png" alt="${playerInfo.nickname}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 5px;">
-        <p style="margin: 0;">${playerInfo.nickname}</p>
-        <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
-      `;
-    } else {
-      playerSlot.style.border = '2px dashed #aaa';
-      playerSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-      playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p><p>(비어있음)</p>`;
+    if (i < maxPlayers) { // Open slots
+      if (playerInfo) {
+        playerSlot.style.border = '2px solid #4CAF50';
+        playerSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+        playerSlot.innerHTML = `
+          <img src="./resources/character/${playerInfo.character}.png" alt="${playerInfo.nickname}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 5px;">
+          <p style="margin: 0;">${playerInfo.nickname}</p>
+          <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
+        `;
+      } else {
+        playerSlot.style.border = '2px dashed #aaa';
+        playerSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p><p>(비어있음)</p>`;
+      }
+    } else { // Closed slots
+      playerSlot.classList.add('closed');
+      playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p>`;
+      if (isRoomCreator) {
+        playerSlot.addEventListener('click', () => {
+          socket.emit('increaseMaxPlayers');
+        });
+      }
     }
     playerSlotsContainer.appendChild(playerSlot);
   }
