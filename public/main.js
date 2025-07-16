@@ -358,13 +358,42 @@ const createRoomConfirmButton = document.getElementById('createRoomConfirmButton
 const createRoomCancelButton = document.getElementById('createRoomCancelButton');
 
 
-function updatePlayers(players) {
-  playerList.innerHTML = '';
-  players.forEach(p => {
-    const li = document.createElement('li');
-    li.textContent = `${p.nickname} (${p.id.substring(0, 4)}) ${p.ready ? '(준비)' : '(대기)'}`;
-    playerList.appendChild(li);
-  });
+const playerSlotsContainer = document.getElementById('playerSlotsContainer');
+
+function updatePlayers(players, maxPlayers) {
+  playerSlotsContainer.innerHTML = '';
+  for (let i = 0; i < maxPlayers; i++) {
+    const playerSlot = document.createElement('div');
+    playerSlot.classList.add('player-slot');
+    playerSlot.style.cssText = `
+      width: 120px;
+      height: 150px;
+      border: 2px dashed #aaa;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.1);
+    `;
+
+    const playerInfo = players[i];
+    if (playerInfo) {
+      playerSlot.style.border = '2px solid #4CAF50';
+      playerSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+      playerSlot.innerHTML = `
+        <img src="./resources/character/${playerInfo.character}.png" alt="${playerInfo.nickname}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 5px;">
+        <p style="margin: 0;">${playerInfo.nickname}</p>
+        <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
+      `;
+    } else {
+      playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p><p>(비어있음)</p>`;
+    }
+    playerSlotsContainer.appendChild(playerSlot);
+  }
 }
 
 createRoomButton.addEventListener('click', () => {
@@ -507,8 +536,8 @@ socket.on('roomJoined', (roomId) => {
   waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
 });
 
-socket.on('updatePlayers', (players) => {
-  updatePlayers(players);
+socket.on('updatePlayers', (players, maxPlayers) => {
+  updatePlayers(players, maxPlayers);
 });
 
 socket.on('startGame', (players) => {

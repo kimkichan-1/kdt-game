@@ -20,7 +20,7 @@ function updateRoomPlayers(roomId) {
       ready: p.ready,
       character: p.character // Add character
     }));
-    io.to(roomId).emit('updatePlayers', playersData);
+    io.to(roomId).emit('updatePlayers', playersData, rooms[roomId].maxPlayers);
   }
 }
 
