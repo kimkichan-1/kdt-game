@@ -1168,7 +1168,27 @@
     // 모델 로드 함수: 선택된 glTF 파일을 로드하고 장면에 추가
     function loadModel(gltfPath) {
       if (currentModel) {
+        // 이전 모델의 모든 자식 요소를 재귀적으로 순회하며 리소스 해제
+        currentModel.traverse((object) => {
+          if (object.isMesh) {
+            if (object.geometry) {
+              object.geometry.dispose();
+            }
+            if (object.material) {
+              // 재질이 배열인 경우 각 재질을 해제
+              if (Array.isArray(object.material)) {
+                object.material.forEach(material => material.dispose());
+              } else {
+                object.material.dispose();
+              }
+            }
+          }
+        });
         scene.remove(currentModel);
+        currentModel = null;
+      }
+      if (mixer) {
+        mixer.stopAllAction();
         mixer = null;
       }
 
