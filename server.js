@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
         // Check if all players are ready
         const allReady = rooms[socket.roomId].players.every(p => p.ready);
         if (allReady && rooms[socket.roomId].players.length > 0) {
-          io.to(socket.roomId).emit('startGame', rooms[socket.roomId].players);
+          io.to(socket.roomId).emit('startGame', { players: rooms[socket.roomId].players, map: rooms[socket.roomId].map });
         }
       }
     }

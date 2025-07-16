@@ -8,11 +8,12 @@ import { hp } from './hp.js'; // hp.js 임포트
 const socket = io();
 
 export class GameStage3 {
-  constructor(socket, players) {
+  constructor(socket, players, map) {
     this.socket = socket;
     this.players = {}; // To store other players' objects
     this.localPlayerId = socket.id;
     this.playerInfo = players;
+    this.map = map;
 
     this.Initialize();
     this.RAF();
@@ -113,7 +114,8 @@ export class GameStage3 {
 
   CreateGround() {
     const textureLoader = new THREE.TextureLoader();
-    const grassTexture = textureLoader.load('./resources/Map1.png');
+    const capitalizedMapName = this.map.charAt(0).toUpperCase() + this.map.slice(1);
+    const grassTexture = textureLoader.load(`./resources/${capitalizedMapName}.png`);
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;
     grassTexture.repeat.set(1, 1);
@@ -550,10 +552,10 @@ socket.on('updatePlayers', (players, maxPlayers) => {
   updatePlayers(players, maxPlayers);
 });
 
-socket.on('startGame', (players) => {
+socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage3(socket, players);
+  new GameStage3(socket, gameInfo.players, gameInfo.map);
 });
 
 socket.on('roomError', (message) => {
