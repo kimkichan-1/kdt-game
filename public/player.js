@@ -129,8 +129,8 @@ export const player = (() => {
         this.hpUI.updateHP(this.hp_);
       }
 
-      // 피격 효과
-      if (this.hitEffect) {
+      // 피격 효과 (로컬 플레이어에게만 적용)
+      if (!this.params_.isRemote && this.hitEffect) {
         this.hitEffect.style.opacity = '1';
         setTimeout(() => {
           this.hitEffect.style.opacity = '0';
@@ -145,12 +145,14 @@ export const player = (() => {
       if (this.hp_ === 0) {
         this.isDead_ = true; // 죽음 상태로 설정
         this.SetAnimation_('Death'); // Death 애니메이션 재생
-        this.DisableInput_(); // 키 입력 비활성화
-        this.respawnTimer_ = this.respawnDelay_; // 리스폰 타이머 초기화
+        if (!this.params_.isRemote) {
+          this.DisableInput_(); // 키 입력 비활성화
+          this.respawnTimer_ = this.respawnDelay_; // 리스폰 타이머 초기화
 
-        if (this.overlay) {
-          this.overlay.style.visibility = 'visible';
-          this.startCountdown();
+          if (this.overlay) {
+            this.overlay.style.visibility = 'visible';
+            this.startCountdown();
+          }
         }
       }
     }

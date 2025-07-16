@@ -252,9 +252,14 @@ export class GameStage3 {
       }
       // 원격 플레이어 HP 업데이트
       if (data.hp !== undefined) {
-        otherPlayer.hp_ = data.hp;
-        if (otherPlayer.hpUI) {
-          otherPlayer.hpUI.updateHP(data.hp);
+        if (data.hp < otherPlayer.hp_) {
+          // HP가 감소했을 때만 TakeDamage 호출하여 애니메이션 트리거
+          otherPlayer.TakeDamage(otherPlayer.hp_ - data.hp);
+        } else {
+          otherPlayer.hp_ = data.hp;
+          if (otherPlayer.hpUI) {
+            otherPlayer.hpUI.updateHP(data.hp);
+          }
         }
       }
     });
