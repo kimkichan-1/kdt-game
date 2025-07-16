@@ -179,6 +179,20 @@
     z-index: 50; /* Between menu and game */
     display: none; /* Hidden by default */
   }
+  .player-slot {
+    width: 180px; /* Adjusted width for 4 columns */
+    height: 200px; /* Adjusted height */
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px dashed #aaa;
+  }
   #waitingRoom h2 {
     font-size: 36px;
     margin-bottom: 15px;
@@ -969,14 +983,14 @@
   ">
     <div class="waiting-room-header" style="width: 100%; margin-bottom: 20px;">
       <h2 id="waitingRoomTitle" style="font-size: 36px; margin-bottom: 10px; color: #00ffff; text-shadow: 0 0 10px #00ffff;"></h2>
-      <p id="waitingRoomIdDisplay" style="font-size: 24px; font-weight: bold; color: #00ff00; text-shadow: 0 0 8px #00ff00;"></p>
+      <p id="waitingRoomIdDisplay" style="font-size: 24px; font-weight: bold; color: #00ff00; text-shadow: 0 0 8px #00ff00; display: none;"></p>
     </div>
 
     <div id="playerSlotsContainer" style="
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px; /* Increased gap for better spacing */
+      gap: 10px; /* Adjusted gap for 4x2 grid */
       margin-bottom: 30px; /* Space before footer */
       width: 100%;
       flex-grow: 1; /* Allow player slots to take available space */

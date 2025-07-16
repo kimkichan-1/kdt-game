@@ -532,7 +532,8 @@ readyButton.addEventListener('click', () => {
 
 socket.on('roomCreated', (roomInfo) => {
   waitingRoomIdDisplay.textContent = `ID: ${roomInfo.id}`;
-  waitingRoomTitle.textContent = roomInfo.name;
+  waitingRoomTitle.textContent = `${roomInfo.name} (ID: ${roomInfo.id})`;
+  waitingRoomIdDisplay.style.display = 'none';
   const capitalizedMapName = roomInfo.map.charAt(0).toUpperCase() + roomInfo.map.slice(1);
   currentMapImage.src = `./resources/${capitalizedMapName}.png`;
   currentMapImage.style.display = 'block';
@@ -541,7 +542,8 @@ socket.on('roomCreated', (roomInfo) => {
 
 socket.on('roomJoined', (roomInfo) => {
   waitingRoomIdDisplay.textContent = `ID: ${roomInfo.id}`;
-  waitingRoomTitle.textContent = roomInfo.name;
+  waitingRoomTitle.textContent = `${roomInfo.name} (ID: ${roomInfo.id})`;
+  waitingRoomIdDisplay.style.display = 'none';
   const capitalizedMapName = roomInfo.map.charAt(0).toUpperCase() + roomInfo.map.slice(1);
   currentMapImage.src = `./resources/${capitalizedMapName}.png`;
   currentMapImage.style.display = 'block';
