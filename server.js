@@ -105,7 +105,11 @@ io.on('connection', (socket) => {
         // Check if all players are ready
         const allReady = rooms[socket.roomId].players.every(p => p.ready);
         if (allReady && rooms[socket.roomId].players.length > 0) {
-          io.to(socket.roomId).emit('startGame', { players: rooms[socket.roomId].players, map: rooms[socket.roomId].map });
+          // If all players are ready, notify the room creator
+          const roomCreator = rooms[socket.roomId].players[0]; // Assuming the first player is the creator
+          if (roomCreator.id === socket.id) { // Only if the current player is the creator
+            socket.emit('allPlayersReady');
+          }
         }
       }
     }
@@ -115,6 +119,25 @@ io.on('connection', (socket) => {
     if (socket.roomId && rooms[socket.roomId]) {
       // Broadcast game updates to all other clients in the same room
       socket.to(socket.roomId).emit('gameUpdate', data);
+    }
+  });
+
+  socket.on('startGameRequest', () => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const room = rooms[socket.roomId];
+      const roomCreator = room.players[0]; // Assuming the first player is the creator
+
+      // Check if the request comes from the room creator
+      if (roomCreator.id === socket.id) {
+        const allReady = room.players.every(p => p.ready);
+        if (allReady && room.players.length > 0) {
+          io.to(socket.roomId).emit('startGame', { players: room.players, map: room.map });
+        } else {
+          socket.emit('roomError', '모든 플레이어가 준비되지 않았습니다.');
+        }
+      } else {
+        socket.emit('roomError', '방장만 게임을 시작할 수 있습니다.');
+      }
     }
   });
 

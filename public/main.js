@@ -342,6 +342,8 @@ const waitingRoom = document.getElementById('waitingRoom');
 const waitingRoomIdDisplay = document.getElementById('waitingRoomIdDisplay');
 const playerList = document.getElementById('playerList');
 const readyButton = document.getElementById('readyButton');
+const startGameButton = document.getElementById('startGameButton');
+
 // const maxPlayersInput = document.getElementById('maxPlayersInput'); // This input is now part of the create room popup
 
 // New elements for create room popup
@@ -350,6 +352,7 @@ const characterNicknamePopup = document.getElementById('characterNicknamePopup')
 
 let roomSettings = {}; // Global variable to store room creation settings
 let joinRoomId = null; // Global variable to store room ID for joining
+let isRoomCreator = false; // Track if the current client is the room creator
 
 const mapSelectionContainer = document.getElementById('mapSelectionContainer');
 const mapThumbnails = document.querySelectorAll('.map-thumbnail');
@@ -530,6 +533,12 @@ readyButton.addEventListener('click', () => {
   socket.emit('ready');
 });
 
+startGameButton.addEventListener('click', () => {
+  if (!startGameButton.disabled) {
+    socket.emit('startGameRequest');
+  }
+});
+
 socket.on('roomCreated', (roomInfo) => {
   waitingRoomIdDisplay.textContent = `ID: ${roomInfo.id}`;
   waitingRoomTitle.textContent = `${roomInfo.name} (ID: ${roomInfo.id})`;
@@ -538,6 +547,8 @@ socket.on('roomCreated', (roomInfo) => {
   currentMapImage.src = `./resources/${capitalizedMapName}.png`;
   currentMapImage.style.display = 'block';
   mapPlaceholderText.style.display = 'none';
+  isRoomCreator = true; // Set to true for the room creator
+  startGameButton.style.display = 'block'; // Show start game button
 });
 
 socket.on('roomJoined', (roomInfo) => {
@@ -552,6 +563,10 @@ socket.on('roomJoined', (roomInfo) => {
 
 socket.on('updatePlayers', (players, maxPlayers) => {
   updatePlayers(players, maxPlayers);
+  if (isRoomCreator) {
+    const allReady = players.every(p => p.ready);
+    startGameButton.disabled = !allReady;
+  }
 });
 
 socket.on('startGame', (gameInfo) => {

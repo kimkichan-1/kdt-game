@@ -1,8 +1,6 @@
-fix: 게임 시작 시 맵 텍스처 로드 오류 수정
+feat: 대기실 레이아웃 개선 및 정보 표시
 
-- `server.js`: `startGame` 이벤트에 현재 방의 맵 정보를 함께 전송하도록 수정
-- `public/main.js`:
-    - `GameStage3` 클래스 생성자가 맵 정보를 받을 수 있도록 수정
-    - `socket.on('startGame')`에서 `GameStage3`를 호출할 때 맵 정보를 전달하도록 수정
-    - `CreateGround()` 함수가 받은 맵 정보를 사용하여 동적으로 맵 텍스처를 로드하도록 수정
-- `map1.png` 404 오류 해결
+- 대기실 레이아웃을 요청에 따라 재구성
+- `public/index.html`: 대기실 UI를 방 이름, 방 ID, 플레이어 슬롯, 맵 이미지, 준비 버튼으로 재배치 및 스타일링
+- `public/main.js`: `updatePlayers` 함수에서 플레이어 슬롯 스타일을 `index.html`로 이동하고, `roomCreated`, `roomJoined` 이벤트에서 방 이름과 맵 이미지를 대기실에 표시하도록 수정
+- `server.js`: `roomCreated`, `roomJoined` 이벤트 발생 시 클라이언트로 방 이름과 맵 정보를 함께 전송하도록 수정
