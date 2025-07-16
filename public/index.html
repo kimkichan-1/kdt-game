@@ -213,6 +213,31 @@
   .player-slot.closed:hover {
     background-color: rgba(0, 0, 0, 0.7); /* Darker on hover */
   }
+  .player-slot .close-slot-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7); /* Red background */
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10; /* Ensure it's above other content */
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.2s;
+  }
+  .player-slot:hover .close-slot-btn {
+    opacity: 1; /* Show on hover */
+  }
+  .player-slot .close-slot-btn:hover {
+    background-color: rgba(255, 0, 0, 1); /* Darker red on hover */
+  }
   #waitingRoom h2 {
     font-size: 36px;
     margin-bottom: 15px;

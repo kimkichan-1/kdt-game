@@ -1,12 +1,12 @@
-feat: 방 생성자만 게임 시작 버튼 제어 및 모든 플레이어 준비 상태 확인
+feat: 대기실 플레이어 슬롯 8개 고정 및 동적 확장 기능 구현
 
-- `public/index.html`: 대기실에 "게임 시작" 버튼 추가 및 초기 숨김 처리
+- `public/index.html`:
+    - `.player-slot`에 대한 CSS를 추가하여 8개의 슬롯이 고정된 크기로 표시되도록 함
+    - 닫힌 슬롯에 X 표시를 위한 스타일 추가
 - `public/main.js`:
-    - `startGameButton` 요소 참조 추가
-    - `isRoomCreator` 변수를 추가하여 현재 클라이언트가 방 생성자인지 추적
-    - `socket.on('roomCreated')`에서 방 생성자에게 "게임 시작" 버튼 표시
-    - `socket.on('updatePlayers')`에서 모든 플레이어가 준비 상태일 때 "게임 시작" 버튼 활성화/비활성화 제어
-    - "게임 시작" 버튼에 이벤트 리스너를 추가하여 서버에 `startGameRequest` 이벤트 전송
+    - `updatePlayers` 함수를 수정하여 항상 8개의 슬롯을 렌더링하고, `maxPlayers` 값에 따라 슬롯을 열거나 닫힌 상태(X 표시)로 표시
+    - 닫힌 슬롯(X 표시) 클릭 시 `increaseMaxPlayers` 소켓 이벤트를 서버로 전송하도록 이벤트 리스너 추가 (방장에게만 활성화)
 - `server.js`:
-    - `ready` 이벤트 핸들러를 수정하여 모든 플레이어가 준비 상태일 때 자동으로 게임을 시작하지 않고, 방 생성자에게 `allPlayersReady` 이벤트를 보내도록 변경
-    - `startGameRequest` 이벤트 핸들러를 추가하여, 요청을 보낸 클라이언트가 방 생성자인지 확인하고 모든 플레이어가 준비 상태인지 다시 확인한 후 `startGame` 이벤트를 보내도록 구현
+    - `increaseMaxPlayers` 소켓 이벤트 핸들러를 추가하여 클라이언트로부터의 요청을 처리
+    - 요청을 보낸 클라이언트가 방장인지 확인하고, `maxPlayers`를 8까지 증가시킬 수 있도록 로직 구현
+    - `maxPlayers`가 변경되면 `updatePlayers` 이벤트를 다시 클라이언트로 전송

@@ -387,10 +387,30 @@ function updatePlayers(players, maxPlayers) {
           <p style="margin: 0;">${playerInfo.nickname}</p>
           <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
         `;
+        if (isRoomCreator) {
+          const closeBtn = document.createElement('div');
+          closeBtn.classList.add('close-slot-btn');
+          closeBtn.textContent = 'X';
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent click from propagating to the slot itself
+            socket.emit('closePlayerSlot', i); // Send slot index
+          });
+          playerSlot.appendChild(closeBtn);
+        }
       } else {
         playerSlot.style.border = '2px dashed #aaa';
         playerSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
         playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p><p>(비어있음)</p>`;
+        if (isRoomCreator) {
+          const closeBtn = document.createElement('div');
+          closeBtn.classList.add('close-slot-btn');
+          closeBtn.textContent = 'X';
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            socket.emit('closePlayerSlot', i);
+          });
+          playerSlot.appendChild(closeBtn);
+        }
       }
     } else { // Closed slots
       playerSlot.classList.add('closed');

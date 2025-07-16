@@ -159,6 +159,32 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('closePlayerSlot', (slotIndex) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const room = rooms[socket.roomId];
+      const roomCreator = room.players[0];
+
+      if (roomCreator.id === socket.id) {
+        if (slotIndex < room.maxPlayers) { // Only allow closing open slots
+          const playerToKick = room.players[slotIndex];
+          if (playerToKick) {
+            // Kick the player
+            io.to(playerToKick.id).emit('roomError', '방장에 의해 강제 퇴장되었습니다.');
+            io.sockets.sockets.get(playerToKick.id)?.leave(socket.roomId);
+            room.players.splice(slotIndex, 1);
+          }
+          // Decrease maxPlayers, but not below current player count
+          room.maxPlayers = Math.max(room.players.length, room.maxPlayers - 1);
+          updateRoomPlayers(socket.roomId);
+        } else {
+          socket.emit('roomError', '유효하지 않은 슬롯입니다.');
+        }
+      } else {
+        socket.emit('roomError', '방장만 슬롯을 닫을 수 있습니다.');
+      }
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     if (socket.roomId && rooms[socket.roomId]) {
