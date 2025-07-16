@@ -373,13 +373,14 @@ export const player = (() => {
     }
 
     startCountdown() {
-      let count = Math.floor(this.respawnDelay_) - 1; // 3초부터 시작하도록 1 감소
+      let count = Math.floor(this.respawnDelay_); // 3초부터 시작
       this.overlayCountdown.innerText = count;
 
       this.countdownTimer = setInterval(() => {
         count--;
-        this.overlayCountdown.innerText = count;
-        if (count <= 0) {
+        if (count >= 1) { // 1까지만 표시
+          this.overlayCountdown.innerText = count;
+        } else {
           clearInterval(this.countdownTimer);
           this.countdownTimer = null;
         }
