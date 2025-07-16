@@ -448,7 +448,8 @@ const roomNameCreate = document.getElementById('roomNameCreate');
     const selectedMap = selectedMapElement ? selectedMapElement.dataset.map : 'map1'; // Default to map1 if none selected
     const maxPlayers = parseInt(maxPlayersCreate.value, 10);
     const visibility = roomVisibility.value;
-    const roundDuration = parseInt(roundTime.value, 10);
+    const selectedRoundTimeButton = document.querySelector('#roundTimeOptions .round-time-btn.selected');
+    const roundDuration = selectedRoundTimeButton ? parseInt(selectedRoundTimeButton.dataset.value, 10) : 180; // 기본값 180초
     const roomName = roomNameCreate.value.trim();
 
   if (!roomName) {
