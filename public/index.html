@@ -948,14 +948,80 @@
   </div>
 
   <!-- Waiting Room Display -->
-  <div id="waitingRoom" style="display: none;">
-    <h2>대기 중...</h2>
-    <p id="waitingRoomIdDisplay"></p>
-    <p>다른 플레이어를 기다리는 중입니다.</p>
-    <div id="playerSlotsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px;">
+  <div id="waitingRoom" style="display: none; /* initial display */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8); /* Darker background for better contrast */
+    color: #fff;
+    padding: 30px;
+    border-radius: 15px; /* Slightly more rounded corners */
+    text-align: center;
+    z-index: 50;
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: space-between; /* Distribute space */
+    align-items: center; /* Center horizontally */
+    width: 80%; /* Adjust width as needed */
+    max-width: 900px; /* Max width for larger screens */
+    min-height: 500px; /* Minimum height */
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); /* Neon glow effect */
+  ">
+    <div class="waiting-room-header" style="width: 100%; margin-bottom: 20px;">
+      <h2 id="waitingRoomTitle" style="font-size: 36px; margin-bottom: 10px; color: #00ffff; text-shadow: 0 0 10px #00ffff;"></h2>
+      <p id="waitingRoomIdDisplay" style="font-size: 24px; font-weight: bold; color: #00ff00; text-shadow: 0 0 8px #00ff00;"></p>
+    </div>
+
+    <div id="playerSlotsContainer" style="
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px; /* Increased gap for better spacing */
+      margin-bottom: 30px; /* Space before footer */
+      width: 100%;
+      flex-grow: 1; /* Allow player slots to take available space */
+      align-content: center; /* Center content vertically if there's extra space */
+    ">
       <!-- Player slots will be dynamically added here -->
     </div>
-    <button id="readyButton">준비</button>
+
+    <div class="waiting-room-footer" style="
+      width: 100%;
+      display: flex;
+      justify-content: space-between; /* Map on left, button on right */
+      align-items: flex-end; /* Align items to the bottom */
+      margin-top: auto; /* Push to bottom */
+    ">
+      <div id="waitingRoomMapPreview" style="
+        width: 200px; /* Fixed width for map preview */
+        height: 150px; /* Fixed height */
+        border: 3px solid #00ffff; /* Border for map preview */
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        color: #ccc;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+      ">
+        <img id="currentMapImage" src="" alt="Current Map" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        <span id="mapPlaceholderText">맵 이미지</span>
+      </div>
+      <button id="readyButton" style="
+        padding: 15px 40px;
+        font-size: 28px;
+        background-color: #ff4500; /* Orange-red for ready button */
+        border: none;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.7); /* Glow effect */
+      ">준비</button>
+    </div>
   </div>
 
   <div id="controls" style="display: none;">

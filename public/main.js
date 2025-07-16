@@ -360,25 +360,15 @@ const createRoomCancelButton = document.getElementById('createRoomCancelButton')
 
 const playerSlotsContainer = document.getElementById('playerSlotsContainer');
 
+const waitingRoomTitle = document.getElementById('waitingRoomTitle');
+const currentMapImage = document.getElementById('currentMapImage');
+const mapPlaceholderText = document.getElementById('mapPlaceholderText');
+
 function updatePlayers(players, maxPlayers) {
   playerSlotsContainer.innerHTML = '';
   for (let i = 0; i < maxPlayers; i++) {
     const playerSlot = document.createElement('div');
     playerSlot.classList.add('player-slot');
-    playerSlot.style.cssText = `
-      width: 120px;
-      height: 150px;
-      border: 2px dashed #aaa;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      font-size: 14px;
-      text-align: center;
-      background-color: rgba(255, 255, 255, 0.1);
-    `;
 
     const playerInfo = players[i];
     if (playerInfo) {
@@ -390,6 +380,8 @@ function updatePlayers(players, maxPlayers) {
         <p style="margin: 0; font-size: 12px; color: #eee;">${playerInfo.ready ? '(준비)' : '(대기)'}</p>
       `;
     } else {
+      playerSlot.style.border = '2px dashed #aaa';
+      playerSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
       playerSlot.innerHTML = `<p>슬롯 ${i + 1}</p><p>(비어있음)</p>`;
     }
     playerSlotsContainer.appendChild(playerSlot);
@@ -488,7 +480,7 @@ socket.on('publicRoomsList', (rooms) => {
   rooms.forEach(room => {
     const li = document.createElement('li');
     li.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; text-align: left; cursor: pointer; background-color: #f9f9f9;';
-    li.textContent = `방 이름: ${room.name} (ID: ${room.id.substring(0, 4)}, 인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
+    li.textContent = `${room.name} (ID: ${room.id.substring(0, 4)}, 인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
     li.dataset.roomId = room.id;
     li.addEventListener('click', () => {
       if (selectedPublicRoomId === room.id) {
@@ -536,12 +528,20 @@ readyButton.addEventListener('click', () => {
   socket.emit('ready');
 });
 
-socket.on('roomCreated', (roomId) => {
-  waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
+socket.on('roomCreated', (roomInfo) => {
+  waitingRoomIdDisplay.textContent = `ID: ${roomInfo.id}`;
+  waitingRoomTitle.textContent = roomInfo.name;
+  currentMapImage.src = `./resources/${roomInfo.map}.png`;
+  currentMapImage.style.display = 'block';
+  mapPlaceholderText.style.display = 'none';
 });
 
-socket.on('roomJoined', (roomId) => {
-  waitingRoomIdDisplay.textContent = `방 ID: ${roomId}`;
+socket.on('roomJoined', (roomInfo) => {
+  waitingRoomIdDisplay.textContent = `ID: ${roomInfo.id}`;
+  waitingRoomTitle.textContent = roomInfo.name;
+  currentMapImage.src = `./resources/${roomInfo.map}.png`;
+  currentMapImage.style.display = 'block';
+  mapPlaceholderText.style.display = 'none';
 });
 
 socket.on('updatePlayers', (players, maxPlayers) => {

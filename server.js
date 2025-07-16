@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access
     console.log(`Room created: ${roomId} by ${socket.id} with settings:`, roomSettings);
-    socket.emit('roomCreated', roomId);
+    socket.emit('roomCreated', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
     updateRoomPlayers(roomId);
   });
 
@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
       rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character }); // Store nickname and character
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
-      socket.emit('roomJoined', roomId);
+      socket.emit('roomJoined', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
       updateRoomPlayers(roomId);
     } else {
       socket.emit('roomError', 'Room not found');
