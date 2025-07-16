@@ -1,6 +1,4 @@
-feat: 대기실 레이아웃 개선 및 정보 표시
+fix: 대기실 UI가 메인 화면에 노출되는 문제 수정
 
-- 대기실 레이아웃을 요청에 따라 재구성
-- `public/index.html`: 대기실 UI를 방 이름, 방 ID, 플레이어 슬롯, 맵 이미지, 준비 버튼으로 재배치 및 스타일링
-- `public/main.js`: `updatePlayers` 함수에서 플레이어 슬롯 스타일을 `index.html`로 이동하고, `roomCreated`, `roomJoined` 이벤트에서 방 이름과 맵 이미지를 대기실에 표시하도록 수정
-- `server.js`: `roomCreated`, `roomJoined` 이벤트 발생 시 클라이언트로 방 이름과 맵 정보를 함께 전송하도록 수정
+- `public/index.html`에서 `waitingRoom` 요소의 초기 `display: flex;` 속성을 제거하여 대기실이 기본적으로 숨겨지도록 수정
+- `public/main.js`에서 대기실 표시를 제어하도록 변경
