@@ -40,7 +40,7 @@ export const player = (() => {
       this.hp_ = 100; // HP 속성 추가
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
       this.isDead_ = false; // 죽음 상태 플래그 추가
-      this.respawnDelay_ = 4; // 리스폰 딜레이 (초) 5초에서 4초로 변경
+      this.respawnDelay_ = 3; // 리스폰 딜레이 (초) 5초에서 4초로 변경
       this.respawnTimer_ = 0; // 리스폰 타이머
 
       this.LoadModel_(params.character);
