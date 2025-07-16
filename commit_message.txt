@@ -1,12 +1,3 @@
-feat: 열린 슬롯 닫기 및 플레이어 강제 퇴장 기능 구현
+fix: 자신의 캐릭터 체력바 UI에 닉네임 표시
 
-- `public/index.html`: 열린 슬롯에 'X' 버튼을 위한 CSS 스타일 추가
-- `public/main.js`:
-    - `updatePlayers` 함수를 수정하여 방장일 경우 열린 슬롯에 'X' 버튼을 렌더링
-    - 'X' 버튼 클릭 시 `closePlayerSlot` 소켓 이벤트를 서버로 전송하도록 이벤트 리스너 추가 (슬롯 인덱스 포함)
-- `server.js`:
-    - `closePlayerSlot` 소켓 이벤트 핸들러를 추가하여 클라이언트 요청 처리
-    - 요청을 보낸 클라이언트가 방장인지 확인
-    - 닫으려는 슬롯에 플레이어가 있을 경우 해당 플레이어를 퇴장시키고 `playerLeft` 이벤트 전송
-    - `maxPlayers` 값을 1 감소 (현재 플레이어 수보다 작아지지 않도록 제한)
-    - `maxPlayers` 변경 시 `updateRoomPlayers` 이벤트 전송
+- `public/main.js`의 `CreateLocalPlayer` 함수를 수정하여 로컬 플레이어의 닉네임을 `hp.HPUI` 생성자에 전달하도록 변경
