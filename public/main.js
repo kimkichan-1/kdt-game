@@ -255,6 +255,13 @@ export class GameStage3 {
         if (data.hp < otherPlayer.hp_) {
           // HP가 감소했을 때만 TakeDamage 호출하여 애니메이션 트리거
           otherPlayer.TakeDamage(otherPlayer.hp_ - data.hp);
+        } else if (data.hp === 100 && otherPlayer.isDead_) { // HP가 100으로 회복되고 죽은 상태였으면 리스폰 처리
+          otherPlayer.hp_ = data.hp;
+          otherPlayer.isDead_ = false;
+          otherPlayer.SetRemoteAnimation('Idle');
+          if (otherPlayer.hpUI) {
+            otherPlayer.hpUI.updateHP(data.hp);
+          }
         } else {
           otherPlayer.hp_ = data.hp;
           if (otherPlayer.hpUI) {
