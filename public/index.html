@@ -1221,9 +1221,18 @@
       );
     }
 
+    let isClickEnabled = true; // 클릭 활성화 플래그
+
     // 캐릭터 클릭 이벤트: 선택한 캐릭터의 모델과 이름 표시
     characters.forEach(char => {
       char.addEventListener('click', () => {
+        if (!isClickEnabled) return; // 클릭 비활성화 상태면 리턴
+
+        isClickEnabled = false; // 클릭 비활성화
+        setTimeout(() => {
+          isClickEnabled = true; // 1초 후 클릭 활성화
+        }, 1000);
+
         characters.forEach(c => c.classList.remove('selected'));
         char.classList.add('selected');
         const gltfPath = char.dataset.gltf;
