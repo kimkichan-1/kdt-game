@@ -530,21 +530,29 @@ socket.on('publicRoomsList', (rooms) => {
   rooms.forEach(room => {
     const li = document.createElement('li');
     li.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; text-align: left; cursor: pointer; background-color: #f9f9f9;';
-    li.textContent = `${room.name} (ID: ${room.id.substring(0, 4)}, 인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map})`;
+    const statusText = room.status === 'playing' ? '게임중' : '대기중';
+    const statusColor = room.status === 'playing' ? 'red' : 'green';
+    li.innerHTML = `${room.name} (ID: ${room.id.substring(0, 4)}, 인원: ${room.players}/${room.maxPlayers}, 맵: ${room.map}) <span style="color: ${statusColor}; float: right;">${statusText}</span>`;
     li.dataset.roomId = room.id;
-    li.addEventListener('click', () => {
-      if (selectedPublicRoomId === room.id) {
-        selectedPublicRoomId = null;
-        li.style.backgroundColor = '#f9f9f9';
-      } else {
-        const prevSelected = document.querySelector('#publicRoomList li[style*="background-color: #e0e0e0"]');
-        if (prevSelected) {
-          prevSelected.style.backgroundColor = '#f9f9f9';
+
+    if (room.status === 'playing') {
+      li.style.cursor = 'not-allowed';
+      li.style.color = '#aaa';
+    } else {
+      li.addEventListener('click', () => {
+        if (selectedPublicRoomId === room.id) {
+          selectedPublicRoomId = null;
+          li.style.backgroundColor = '#f9f9f9';
+        } else {
+          const prevSelected = document.querySelector('#publicRoomList li[style*="background-color: #e0e0e0"]');
+          if (prevSelected) {
+            prevSelected.style.backgroundColor = '#f9f9f9';
+          }
+          selectedPublicRoomId = room.id;
+          li.style.backgroundColor = '#e0e0e0';
         }
-        selectedPublicRoomId = room.id;
-        li.style.backgroundColor = '#e0e0e0';
-      }
-    });
+      });
+    }
     publicRoomList.appendChild(li);
   });
 });

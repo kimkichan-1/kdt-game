@@ -40,7 +40,8 @@ io.on('connection', (socket) => {
       players: room.players.length,
       maxPlayers: room.maxPlayers,
       map: room.map,
-      name: room.name // Add room name
+      name: room.name, // Add room name
+      status: room.status // Add room status
     }));
     socket.emit('publicRoomsList', publicRooms);
   });
@@ -57,7 +58,8 @@ io.on('connection', (socket) => {
       maxPlayers: maxPlayers,
       visibility: visibility,
       roundTime: roundTime,
-      name: roomName // Store room name
+      name: roomName, // Store room name
+      status: 'waiting' // Add room status
     };
     socket.join(roomId);
     socket.roomId = roomId; // Store roomId on socket for easy access
@@ -76,6 +78,11 @@ io.on('connection', (socket) => {
       // Check if room is full
       if (rooms[roomId].players.length >= rooms[roomId].maxPlayers) {
         socket.emit('roomError', 'Room is full');
+        return;
+      }
+      // Check if room is playing
+      if (rooms[roomId].status === 'playing') {
+        socket.emit('roomError', 'Game is already in progress');
         return;
       }
       // If private room, check if the provided roomId matches the actual roomId
@@ -131,6 +138,7 @@ io.on('connection', (socket) => {
       if (roomCreator.id === socket.id) {
         const allReady = room.players.every(p => p.ready);
         if (allReady && room.players.length > 0) {
+          room.status = 'playing'; // Change room status to playing
           io.to(socket.roomId).emit('startGame', { players: room.players, map: room.map });
         } else {
           socket.emit('roomError', '모든 플레이어가 준비되지 않았습니다.');
