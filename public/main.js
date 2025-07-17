@@ -48,7 +48,7 @@ export class GameStage3 {
     // 맵 경계 정의 (80x80 맵의 절반)
     this.mapBounds = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
     this.damageTimer = 0;
-    this.damageInterval = 1.0; // 1초마다 데미지
+    this.damageInterval = 0.5; // 0.5초마다 데미지
     this.damageAmount = 25; // 데미지량
     this.isRespawning = false;
 
