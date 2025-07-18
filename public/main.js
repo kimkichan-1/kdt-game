@@ -1,19 +1,20 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js';
 import { player } from './player.js';
-import { object } from './object.js';
+
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
 
 const socket = io();
 
-export class GameStage1 {
-  constructor(socket, players, map) {
+export class GameStage {
+  constructor(socket, players, map, objectModule) {
     this.socket = socket;
     this.players = {}; // To store other players' objects
     this.localPlayerId = socket.id;
     this.playerInfo = players;
     this.map = map;
+    this.objectModule = objectModule; // 동적으로 로드된 object 모듈
 
     this.Initialize();
     this.RAF();
@@ -140,7 +141,7 @@ export class GameStage1 {
       const z = Math.random() * 80 - 40;
       let y = 0.5; // Default y position
 
-      const collidables = this.npc_.GetCollidables();
+      const collidables = (this.map === 'map1') ? this.npc_.GetCollidables() : this.npc_.getCollidables();
       const checkPosition = new THREE.Vector3(x, 100, z); // Check from a high position
       const raycaster = new THREE.Raycaster(checkPosition, new THREE.Vector3(0, -1, 0));
 
@@ -188,7 +189,15 @@ export class GameStage1 {
 
   CreateLocalPlayer() {
     const npcPos = new THREE.Vector3(0, 0, -4);
-    this.npc_ = new object.NPC(this.scene, npcPos);
+    if (this.map === 'map1') {
+      this.npc_ = new this.objectModule.NPC(this.scene, npcPos);
+    } else if (this.map === 'map2') {
+      this.npc_ = new this.objectModule.PoolTable(this.scene);
+      this.npc_.LoadTable().then(() => {
+        const initialPosition = this.getRandomPosition();
+        this.player_.SetPosition([initialPosition.x, initialPosition.y, initialPosition.z]);
+      });
+    }
 
     const localPlayerData = this.playerInfo.find(p => p.id === this.localPlayerId);
 
@@ -294,7 +303,7 @@ export class GameStage1 {
     this.prevTime = time || performance.now();
 
     if (this.player_ && this.player_.mesh_) {
-      this.player_.Update(delta, this.rotationAngle, this.npc_.GetCollidables());
+      this.player_.Update(delta, this.rotationAngle, (this.map === 'map1') ? this.npc_.GetCollidables() : this.npc_.getCollidables());
       this.UpdateCamera();
 
       // Send player position to server
@@ -625,7 +634,15 @@ socket.on('updatePlayers', (players, maxPlayers) => {
 socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage1(socket, gameInfo.players, gameInfo.map);
+  if (gameInfo.map === 'map1') {
+    import('./object.js').then(({ object }) => {
+      new GameStage(socket, gameInfo.players, gameInfo.map, object.NPC);
+    });
+  } else if (gameInfo.map === 'map2') {
+    import('./object1.js').then(({ object1 }) => {
+      new GameStage(socket, gameInfo.players, gameInfo.map, object1.PoolTable);
+    });
+  }
 });
 
 socket.on('roomError', (message) => {
