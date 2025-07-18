@@ -7,7 +7,7 @@ import { hp } from './hp.js'; // hp.js 임포트
 
 const socket = io();
 
-export class GameStage3 {
+export class GameStage1 {
   constructor(socket, players, map) {
     this.socket = socket;
     this.players = {}; // To store other players' objects
@@ -625,7 +625,7 @@ socket.on('updatePlayers', (players, maxPlayers) => {
 socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage3(socket, gameInfo.players, gameInfo.map);
+  new GameStage1(socket, gameInfo.players, gameInfo.map);
 });
 
 socket.on('roomError', (message) => {
