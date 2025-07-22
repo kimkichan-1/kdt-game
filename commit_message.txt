@@ -1,3 +1,1 @@
-fix: 자신의 캐릭터 체력바 UI에 닉네임 표시
-
-- `public/main.js`의 `CreateLocalPlayer` 함수를 수정하여 로컬 플레이어의 닉네임을 `hp.HPUI` 생성자에 전달하도록 변경
+Refactor: GameStage3을 GameStage1으로 변경
