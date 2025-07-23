@@ -489,7 +489,7 @@ export const player = (() => {
         
         // 근접 무기인 경우 Y축으로 90도 회전
         if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
-          weaponModel.rotation.set(-Math.PI / 2, Math.PI / 2, 0); 
+          weaponModel.rotation.set(Math.PI / 2, Math.PI / 2, 0); 
         } else {
           weaponModel.rotation.set(0, 0, 0); // 뼈대 기준으로 회전 조정
         }

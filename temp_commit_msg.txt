@@ -1,3 +1,3 @@
-fix: 공격 모션 중 움직임 제한 해제
+fix: 근접 무기 장착 시 X축 회전 추가
 
-- `public/player.js` 수정: `Update` 메서드에서 공격 애니메이션 중에 플레이어의 움직임을 막던 로직 제거.
+- `public/player.js` 수정: `EquipWeapon` 메서드에서 근접 무기 장착 시 X축으로 -90도 회전 추가.
