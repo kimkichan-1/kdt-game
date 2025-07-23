@@ -412,12 +412,13 @@ export const player = (() => {
         return;
       }
 
-      this.UnequipWeapon(); // 기존 무기가 있다면 제거
-
       const loader = new FBXLoader();
       loader.setPath('./resources/weapon/FBX/');
 
       loader.load(weaponName, (fbx) => {
+        // 새로운 무기가 로드되기 직전에 이전 무기를 확실히 제거
+        this.UnequipWeapon(); 
+
         const weaponModel = fbx;
 
         // KDTgames-main/item.js의 스케일 로직 참고

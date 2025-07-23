@@ -1,4 +1,3 @@
-fix: 원격 플레이어 무기 장착 동기화 버그 수정
+fix: 원격 플레이어 무기 장착 로그 과도 출력 문제 해결
 
-- `public/player.js` 수정: `EquipWeapon` 메서드에서 로드된 `weaponModel`의 `userData`에 `weaponName`을 저장하도록 수정.
-- `public/main.js` 수정: `RAF` 함수에서 `gameUpdate` 이벤트 발생 시 `equippedWeapon` 정보를 `this.player_.currentWeaponModel.userData.weaponName`을 통해 가져오도록 수정.
+- `public/main.js` 수정: `gameUpdate` 이벤트 핸들러에서 원격 플레이어의 `equippedWeapon` 상태가 현재 장착된 무기와 다를 경우에만 `EquipWeapon` 또는 `UnequipWeapon` 함수를 호출하도록 로직 추가.
