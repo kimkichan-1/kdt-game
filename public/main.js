@@ -279,6 +279,14 @@ export class GameStage1 {
           }
         }
       }
+      // 원격 플레이어 무기 장착/해제 업데이트
+      if (data.equippedWeapon !== undefined) {
+        if (data.equippedWeapon) {
+          otherPlayer.EquipWeapon(data.equippedWeapon);
+        } else {
+          otherPlayer.UnequipWeapon();
+        }
+      }
     });
 
     this.socket.on('playerJoined', (playerId) => {
@@ -320,6 +328,7 @@ export class GameStage1 {
                 this.spawnedWeaponObjects.splice(i, 1);
                 this.socket.emit('weaponPickedUp', weapon.uuid);
                 this.player_.EquipWeapon(weapon.weaponName); // Equip the weapon
+                this.socket.emit('weaponEquipped', weapon.weaponName); // 서버에 무기 장착 정보 전송
                 pickedUp = true;
                 break;
               }
@@ -347,7 +356,8 @@ export class GameStage1 {
         position: this.player_.mesh_.position.toArray(),
         rotation: this.player_.mesh_.rotation.toArray(),
         animation: this.player_.currentAnimationName_, // Add animation state
-        hp: this.player_.hp_ // Add HP state
+        hp: this.player_.hp_, // Add HP state
+        equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.name : null // Add equipped weapon state
       });
 
       // 맵 경계 체크 및 데미지 적용

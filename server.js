@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 
     rooms[roomId] = {
       id: roomId,
-      players: [{ id: socket.id, ready: false, nickname: nickname, character: character }], // Store nickname and character
+      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null }], // Store nickname, character, and equippedWeapon
       gameState: {},
       map: map,
       maxPlayers: maxPlayers,
@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character }); // Store nickname and character
+      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null }); // Store nickname, character, and equippedWeapon
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
@@ -125,6 +125,11 @@ io.on('connection', (socket) => {
 
   socket.on('gameUpdate', (data) => {
     if (socket.roomId && rooms[socket.roomId]) {
+      // Update player's equipped weapon in gameState
+      const playerInRoom = rooms[socket.roomId].players.find(p => p.id === socket.id);
+      if (playerInRoom) {
+        playerInRoom.equippedWeapon = data.equippedWeapon; // Store equipped weapon
+      }
       // Broadcast game updates to all other clients in the same room
       socket.to(socket.roomId).emit('gameUpdate', data);
     }
@@ -218,6 +223,17 @@ io.on('connection', (socket) => {
         rooms[socket.roomId].gameState.spawnedWeapons = spawnedWeapons.filter(weapon => weapon.uuid !== weaponUuid);
         // Broadcast to all clients in the room that this weapon was picked up
         io.to(socket.roomId).emit('weaponPickedUp', weaponUuid);
+      }
+    }
+  });
+
+  socket.on('weaponEquipped', (weaponName) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const playerInRoom = rooms[socket.roomId].players.find(p => p.id === socket.id);
+      if (playerInRoom) {
+        playerInRoom.equippedWeapon = weaponName; // Store equipped weapon
+        // Broadcast to all other clients in the room that this player equipped a weapon
+        socket.to(socket.roomId).emit('playerEquippedWeapon', { playerId: socket.id, weaponName: weaponName });
       }
     }
   });
