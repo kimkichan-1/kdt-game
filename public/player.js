@@ -483,7 +483,10 @@ export const player = (() => {
                 attacker: attacker,
                 type: 'sector',
                 angle: weapon.angle,
-                radius: weapon.radius
+                radius: weapon.radius,
+                onHit: (target) => {
+                  console.log(`${attacker.params_.nickname} hit ${target.params_.nickname || 'NPC'} with ${weapon.name}!`);
+                }
               });
             } else if (weapon.type === 'ranged') {
               this.attackSystem_.spawnMeleeProjectile({
@@ -493,7 +496,10 @@ export const player = (() => {
                 attacker: attacker,
                 type: 'circle',
                 radius: weapon.projectileSize,
-                speed: weapon.projectileSpeed
+                speed: weapon.projectileSpeed,
+                onHit: (target) => {
+                  console.log(`${attacker.params_.nickname} hit ${target.params_.nickname || 'NPC'} with ${weapon.name}!`);
+                }
               });
             }
           }, attackDelay * 1000);
