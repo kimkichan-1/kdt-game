@@ -133,14 +133,9 @@ export const player = (() => {
       }
     }
 
-    TakeDamage(amount) {
-      if (this.hp_ <= 0) return; // 이미 죽었으면 데미지 입지 않음
-
-      this.hp_ -= amount;
-      if (this.hp_ < 0) this.hp_ = 0;
-      if (this.hpUI) {
-        this.hpUI.updateHP(this.hp_);
-      }
+    TakeDamage(newHp) {
+      // HP 값은 main.js에서 서버로부터 받은 값으로 직접 업데이트되므로, 여기서는 시각적 효과만 처리
+      // this.hp_ = newHp; // 이 줄은 main.js에서 처리
 
       // 피격 효과 (로컬 플레이어에게만 적용)
       if (!this.params_.isRemote && this.hitEffect) {
@@ -151,11 +146,12 @@ export const player = (() => {
       }
 
       // HP가 0보다 클 때만 receievehit 애니메이션 재생
-      if (this.hp_ > 0) {
+      if (newHp > 0) {
         this.SetAnimation_('receievehit'); // receievehit 애니메이션 재생
       }
 
-      if (this.hp_ === 0) {
+      // 사망 처리 (HP가 0이 되었을 때만)
+      if (newHp === 0 && !this.isDead_) {
         this.isDead_ = true; // 죽음 상태로 설정
         this.SetAnimation_('Death'); // Death 애니메이션 재생
         if (!this.params_.isRemote) {

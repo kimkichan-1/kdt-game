@@ -329,7 +329,37 @@ export class GameStage1 {
     this.socket.on('hpUpdate', (data) => {
       const targetPlayer = (data.playerId === this.localPlayerId) ? this.player_ : this.players[data.playerId];
       if (targetPlayer) {
-        targetPlayer.TakeDamage(targetPlayer.hp_ - data.hp); // TakeDamage 함수를 통해 HP 업데이트 및 애니메이션/효과 트리거
+        const oldHp = targetPlayer.hp_;
+        targetPlayer.hp_ = data.hp; // 서버에서 받은 HP로 직접 설정
+        targetPlayer.hpUI.updateHP(data.hp); // UI 업데이트
+
+        if (data.hp <= 0 && !targetPlayer.isDead_) {
+          targetPlayer.isDead_ = true;
+          targetPlayer.SetAnimation_('Death');
+          if (data.playerId === this.localPlayerId) { // 로컬 플레이어인 경우에만 사망 UI 및 타이머 트리거
+            targetPlayer.DisableInput_();
+            targetPlayer.respawnTimer_ = targetPlayer.respawnDelay_;
+            if (targetPlayer.overlay) {
+              targetPlayer.overlay.style.visibility = 'visible';
+              targetPlayer.startCountdown();
+            }
+          }
+        } else if (data.hp > 0 && targetPlayer.isDead_) { // 리스폰
+          targetPlayer.isDead_ = false;
+          targetPlayer.Respawn_(); // Respawn_ 함수 호출하여 상태 및 위치 재설정
+        } else if (data.hp < oldHp) { // HP가 실제로 감소했을 때만 피격 효과 트리거
+          // 로컬 플레이어인 경우 피격 효과 (빨간 화면) 트리거
+          if (data.playerId === this.localPlayerId && targetPlayer.hitEffect) {
+            targetPlayer.hitEffect.style.opacity = '1';
+            setTimeout(() => {
+              targetPlayer.hitEffect.style.opacity = '0';
+            }, 100);
+          }
+          // 죽지 않았을 경우 receievehit 애니메이션 트리거
+          if (targetPlayer.hp_ > 0) {
+            targetPlayer.SetAnimation_('receievehit');
+          }
+        }
       }
     });
   }
