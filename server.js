@@ -146,11 +146,12 @@ io.on('connection', (socket) => {
           for (let i = 0; i < 10; i++) {
             const weaponName = getRandomWeaponName();
             if (weaponName) {
+              const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); // Simple unique ID
               // Generate random positions within a reasonable range for the map
               const x = Math.random() * 100 - 50; // Example range
               const y = 0; // Assuming weapons are on the ground
               const z = Math.random() * 100 - 50; // Example range
-              spawnedWeapons.push({ weaponName, x, y, z });
+              spawnedWeapons.push({ uuid, weaponName, x, y, z });
             }
           }
           room.gameState.spawnedWeapons = spawnedWeapons; // Store in gameState
@@ -205,6 +206,18 @@ io.on('connection', (socket) => {
         }
       } else {
         socket.emit('roomError', '방장만 슬롯을 닫을 수 있습니다.');
+      }
+    }
+  });
+
+  socket.on('weaponPickedUp', (weaponUuid) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      let spawnedWeapons = rooms[socket.roomId].gameState.spawnedWeapons;
+      if (spawnedWeapons) {
+        // Remove the picked up weapon from the server's game state
+        rooms[socket.roomId].gameState.spawnedWeapons = spawnedWeapons.filter(weapon => weapon.uuid !== weaponUuid);
+        // Broadcast to all clients in the room that this weapon was picked up
+        io.to(socket.roomId).emit('weaponPickedUp', weaponUuid);
       }
     }
   });

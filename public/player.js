@@ -396,6 +396,11 @@ export const player = (() => {
       }
     }
 
+    EquipWeapon(weaponName) {
+      console.log(`Player equipped weapon: ${weaponName}`);
+      // 여기에 무기 모델을 플레이어에게 부착하는 로직 등을 추가할 수 있습니다.
+    }
+
     Update(timeElapsed, rotationAngle = 0, collidables = []) {
       if (this.params_.isRemote) {
         if (this.mixer_) {

@@ -16,6 +16,7 @@ export class GameStage1 {
     this.playerInfo = players;
     this.map = map;
     this.spawnedWeapons = spawnedWeapons; // Store spawned weapons data
+    this.spawnedWeaponObjects = []; // Store actual Weapon instances
 
     this.Initialize();
     this.RAF();
@@ -51,7 +52,8 @@ export class GameStage1 {
 
     await loadWeaponData(); // 무기 데이터 로드를 기다립니다.
     for (const weaponData of this.spawnedWeapons) {
-      spawnWeaponOnMap(this.scene, weaponData.weaponName, weaponData.x, weaponData.y, weaponData.z);
+      const weapon = spawnWeaponOnMap(this.scene, weaponData.weaponName, weaponData.x, weaponData.y, weaponData.z, weaponData.uuid);
+      this.spawnedWeaponObjects.push(weapon);
     }
     this.mapBounds = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
     this.damageTimer = 0;
@@ -60,6 +62,7 @@ export class GameStage1 {
     this.isRespawning = false;
 
     window.addEventListener('resize', () => this.OnWindowResize(), false);
+    document.addEventListener('keydown', (e) => this._OnKeyDown(e), false);
   }
 
   SetupLighting() {
@@ -291,6 +294,40 @@ export class GameStage1 {
         delete this.players[playerId];
       }
     });
+
+    this.socket.on('weaponPickedUp', (weaponUuid) => {
+      const pickedUpWeapon = this.spawnedWeaponObjects.find(w => w.uuid === weaponUuid);
+      if (pickedUpWeapon) {
+        this.scene.remove(pickedUpWeapon.model_);
+        this.spawnedWeaponObjects = this.spawnedWeaponObjects.filter(w => w.uuid !== weaponUuid);
+        console.log(`Weapon ${weaponUuid} removed from scene.`);
+      }
+    });
+  }
+
+  _OnKeyDown(event) {
+    switch (event.keyCode) {
+      case 69: // E key
+        if (this.player_ && this.player_.mesh_) {
+          const playerPosition = this.player_.mesh_.position;
+          let pickedUp = false;
+          for (let i = 0; i < this.spawnedWeaponObjects.length; i++) {
+            const weapon = this.spawnedWeaponObjects[i];
+            if (weapon.model_) {
+              const distance = playerPosition.distanceTo(weapon.model_.position);
+              if (distance < 2.0) { // Pickup range
+                this.scene.remove(weapon.model_);
+                this.spawnedWeaponObjects.splice(i, 1);
+                this.socket.emit('weaponPickedUp', weapon.uuid);
+                this.player_.EquipWeapon(weapon.weaponName); // Equip the weapon
+                pickedUp = true;
+                break;
+              }
+            }
+          }
+        }
+        break;
+    }
   }
 
   RAF(time) {

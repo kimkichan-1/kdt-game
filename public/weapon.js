@@ -18,7 +18,8 @@ export async function loadWeaponData() {
 
 
 export class Weapon {
-    constructor(scene, weaponName, position = new THREE.Vector3(0, 0, 0)) {
+    constructor(scene, weaponName, position = new THREE.Vector3(0, 0, 0), uuid = null) {
+        this.uuid = uuid || THREE.MathUtils.generateUUID(); // 고유 ID 부여
         this.scene_ = scene;
         this.weaponName = weaponName; // FBX 파일 이름 (예: "Sword.fbx")
         this.model_ = null; // 모델을 저장할 속성
@@ -77,8 +78,8 @@ export function getRandomWeaponName() {
 }
 
 // 맵에 무기를 생성하는 함수
-export function spawnWeaponOnMap(scene, weaponName, x, y, z) {
+export function spawnWeaponOnMap(scene, weaponName, x, y, z, uuid) {
     const position = new THREE.Vector3(x, y, z);
-    const weapon = new Weapon(scene, weaponName, position);
+    const weapon = new Weapon(scene, weaponName, position, uuid);
     return weapon;
 }
