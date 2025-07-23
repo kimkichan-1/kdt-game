@@ -540,13 +540,7 @@ export const player = (() => {
         if (this.attackCooldownTimer_ < 0) this.attackCooldownTimer_ = 0;
       }
 
-      // 공격 중이 아니거나, 공격 애니메이션이 끝났을 때만 이동 및 다른 애니메이션 처리
-      if (this.isAttacking_ && (this.currentAnimationName_ === 'SwordSlash' || this.currentAnimationName_ === 'Shoot_OneHanded')) {
-        if (this.mixer_) {
-          this.mixer_.update(timeElapsed);
-        }
-        return; // 공격 애니메이션 중에는 이동 및 다른 애니메이션 처리 건너뛰기
-      }
+      
 
       let newPosition = this.position_.clone();
       let velocity = new THREE.Vector3();
