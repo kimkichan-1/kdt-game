@@ -148,9 +148,9 @@ io.on('connection', (socket) => {
             if (weaponName) {
               const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); // Simple unique ID
               // Generate random positions within a reasonable range for the map
-              const x = Math.random() * 100 - 50; // Example range
+              const x = Math.random() * 80 - 40; // 맵 범위 (-40 ~ 40)
               const y = 0; // Assuming weapons are on the ground
-              const z = Math.random() * 100 - 50; // Example range
+              const z = Math.random() * 80 - 40; // 맵 범위 (-40 ~ 40)
               spawnedWeapons.push({ uuid, weaponName, x, y, z });
             }
           }
