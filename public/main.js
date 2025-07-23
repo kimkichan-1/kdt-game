@@ -257,6 +257,7 @@ export class GameStage1 {
           character: remotePlayerData.character,
           nickname: remotePlayerData.nickname, // 닉네임 추가
           isRemote: true,
+          playerId: remotePlayerData.id, // playerId 추가
           hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname), // 원격 플레이어 HPUI 생성
           attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
           socket: this.socket // socket 인스턴스 전달
