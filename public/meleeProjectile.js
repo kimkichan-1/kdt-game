@@ -19,6 +19,7 @@ export class MeleeProjectile {
     this.isDestroyed = false;
     this.projectileEffect = weapon.projectileEffect || null;
     this.hitTargets = new Set(); // 이미 타격한 대상을 저장하여 중복 타격 방지
+    this.lifeTime = 0.2; // 근접 공격 디버그 메시 유지 시간 (초)
 
     // 디버그 시각화: 항상 생성
     this.debugMesh = this.createDebugMesh();
@@ -99,7 +100,7 @@ export class MeleeProjectile {
     if (this.debugMesh) this.debugMesh.position.copy(this.position);
 
     if (this.type === 'sector' || this.type === 'aerial') {
-      // sector(근접), aerial(공중) 공격은 이동하지 않고, 생성 프레임에만 판정 후 바로 소멸
+      // sector(근접), aerial(공중) 공격은 이동하지 않고, 생성 프레임에만 판정
       for (const target of targets) {
         // 공격자와 같은 대상은 타격하지 않음
         if (target === this.attacker) continue;
@@ -117,15 +118,16 @@ export class MeleeProjectile {
               if (this.onHit) this.onHit(target);
               // 근접 공격은 한 번 타격하면 소멸 (관통 효과가 없는 경우)
               if (this.weapon.projectileEffect !== 'piercing') {
-                this.destroy();
-                return;
+                // this.destroy(); // 즉시 소멸 대신 일정 시간 유지
+                // return;
               }
             }
           }
         }
       }
-      // sector, aerial 타입은 생성 프레임에만 존재 (관통 효과가 없는 경우)
-      if (this.weapon.projectileEffect !== 'piercing') {
+      // 일정 시간 후 소멸
+      this.lifeTime -= delta;
+      if (this.lifeTime <= 0) {
         this.destroy();
         return;
       }
