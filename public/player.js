@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
+import { WEAPON_DATA } from './weapon.js';
 
 export const player = (() => {
   class Player {
@@ -48,8 +49,10 @@ export const player = (() => {
       this.respawnDelay_ = 3; // 리스폰 딜레이 (초) 5초에서 4초로 변경
       this.respawnTimer_ = 0; // 리스폰 타이머
       this.currentWeaponModel = null; // 현재 장착된 무기 모델
+      this.equippedWeaponData_ = null; // 현재 장착된 무기 데이터
       this.originalWeaponRotation_ = null; // 무기 원래 회전 값 저장
       this.onAnimationFinished_ = null; // 애니메이션 종료 시 실행될 콜백
+      this.attackSystem_ = params.attackSystem; // AttackSystem 인스턴스
 
       this.LoadModel_(params.character);
       if (!params.isRemote) {
@@ -447,6 +450,55 @@ export const player = (() => {
         action.clampWhenFinished = true;
         action.play();
 
+        // 공격 판정 발생 시점 (애니메이션에 따라 조절 필요)
+        // 예: SwordSlash 애니메이션의 0.2초 지점에서 공격 판정
+        if (this.equippedWeaponData_ && this.attackSystem_) {
+          const attackDelay = 0.2; // 공격 판정 발생까지의 딜레이 (초)
+          setTimeout(() => {
+            if (!this.isAttacking_) return; // 공격이 취소되었으면 실행하지 않음
+
+            const weapon = this.equippedWeaponData_;
+            const attacker = this; // 공격자 자신
+
+            // 무기 끝 위치 계산 (대략적인 위치)
+            const attackPosition = new THREE.Vector3();
+            if (this.currentWeaponModel) {
+              this.currentWeaponModel.getWorldPosition(attackPosition);
+            } else {
+              // 무기가 없으면 플레이어 전방에서 공격
+              this.mesh_.getWorldPosition(attackPosition);
+              attackPosition.y += 1.0; // 플레이어 높이 고려
+            }
+
+            // 공격 방향 계산 (플레이어의 현재 바라보는 방향)
+            const attackDirection = new THREE.Vector3();
+            this.mesh_.getWorldDirection(attackDirection);
+            attackDirection.negate(); // 모델의 Z축이 반대 방향이므로 뒤집음
+
+            if (weapon.type === 'melee') {
+              this.attackSystem_.spawnMeleeProjectile({
+                position: attackPosition,
+                direction: attackDirection,
+                weapon: weapon,
+                attacker: attacker,
+                type: 'sector',
+                angle: weapon.angle,
+                radius: weapon.radius
+              });
+            } else if (weapon.type === 'ranged') {
+              this.attackSystem_.spawnMeleeProjectile({
+                position: attackPosition,
+                direction: attackDirection,
+                weapon: weapon,
+                attacker: attacker,
+                type: 'circle',
+                radius: weapon.projectileSize,
+                speed: weapon.projectileSpeed
+              });
+            }
+          }, attackDelay * 1000);
+        }
+
         // SwordSlash 애니메이션 시작 시 무기 회전 초기화
         if (animationName === 'SwordSlash' && this.currentWeaponModel) {
           const weaponName = this.currentWeaponModel.userData.weaponName;
@@ -493,6 +545,13 @@ export const player = (() => {
         console.log(`Weapon ${weaponName} is already equipped. Skipping re-equip.`);
         return;
       }
+
+      const weaponData = WEAPON_DATA[weaponName];
+      if (!weaponData) {
+        console.error(`Weapon data not found for ${weaponName}`);
+        return;
+      }
+      this.equippedWeaponData_ = weaponData;
 
       const loader = new FBXLoader();
       loader.setPath('./resources/weapon/FBX/');

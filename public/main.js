@@ -5,6 +5,7 @@ import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
 import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap } from './weapon.js';
+import { AttackSystem } from './attackSystem.js';
 
 const socket = io();
 
@@ -46,6 +47,7 @@ export class GameStage1 {
     this.SetupLighting();
     this.SetupSkyAndFog();
     this.CreateGround();
+    this.attackSystem = new AttackSystem(this.scene); // AttackSystem 인스턴스 생성
     this.CreateLocalPlayer();
 
     
@@ -208,6 +210,7 @@ export class GameStage1 {
       character: localPlayerData.character,
       hpUI: new hp.HPUI(this.scene, this.renderer, localPlayerData.nickname), // HPUI 인스턴스 생성 및 전달
       getRespawnPosition: () => this.getRandomPosition(),
+      attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
       onLoad: () => {
         const initialPosition = this.getRandomPosition();
         this.player_.SetPosition([initialPosition.x, initialPosition.y, initialPosition.z]);
@@ -251,7 +254,8 @@ export class GameStage1 {
           scene: this.scene,
           character: remotePlayerData.character,
           isRemote: true,
-          hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname) // 원격 플레이어 HPUI 생성
+          hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname), // 원격 플레이어 HPUI 생성
+          attackSystem: this.attackSystem // AttackSystem 인스턴스 전달
         });
         this.players[data.playerId] = otherPlayer;
       }
@@ -418,6 +422,9 @@ export class GameStage1 {
     if (this.npc_) {
       this.npc_.Update(delta);
     }
+
+    // AttackSystem 업데이트
+    this.attackSystem.update(delta, this.players, [this.npc_]);
 
     this.renderer.render(this.scene, this.camera);
   }

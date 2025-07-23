@@ -10,7 +10,27 @@ export const object = (() => {
       this.models_ = [];
       this.collidables_ = []; // 충돌 대상 오브젝트 배열
       this.debugHelpers_ = []; // 디버그용 바운딩 박스 배열
+      this.hp_ = 100; // NPC HP
+      this.isDead_ = false; // NPC 죽음 상태
       this.LoadModels_();
+    }
+
+    TakeDamage(amount) {
+      if (this.isDead_) return; // 이미 죽었으면 데미지 입지 않음
+
+      this.hp_ -= amount;
+      if (this.hp_ < 0) this.hp_ = 0;
+
+      if (this.hp_ === 0) {
+        this.isDead_ = true; // 죽음 상태로 설정
+        // TODO: NPC 사망 애니메이션 또는 제거 로직 추가
+        console.log("NPC died!");
+        // 예: this.scene_.remove(this.model_);
+      }
+    }
+
+    canTakeDamage() {
+      return !this.isDead_;
     }
 
     LoadModels_() {

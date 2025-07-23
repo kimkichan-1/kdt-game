@@ -7,7 +7,7 @@ export const hp = (() => {
       this.renderer = renderer;
       this.playerName = playerName;
       this.hp = 100;
-      this.maxHp = 100;
+      this.maxHp = 100; // Max HP is always 100 for players
 
       this.canvas = document.createElement('canvas');
       this.context = this.canvas.getContext('2d');
@@ -74,13 +74,11 @@ export const hp = (() => {
         const headWorldPosition = new THREE.Vector3();
         this.headBone.getWorldPosition(headWorldPosition);
         this.sprite.position.copy(headWorldPosition).add(this.offset);
-        // console.log(`HPUI Head Y: ${headWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
       } else if (this.playerMesh) {
         // headBone이 없는 경우를 대비하여 기존 로직 유지 (fallback)
         const playerWorldPosition = new THREE.Vector3();
         this.playerMesh.getWorldPosition(playerWorldPosition);
         this.sprite.position.copy(playerWorldPosition).add(this.offset);
-        // console.log(`HPUI Player Y (fallback): ${playerWorldPosition.y}, Sprite Y: ${this.sprite.position.y}`); // 디버그 로그 제거
       }
     }
 
