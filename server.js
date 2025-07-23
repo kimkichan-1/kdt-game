@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 
     rooms[roomId] = {
       id: roomId,
-      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null }], // Store nickname, character, and equippedWeapon
+      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }], // Store nickname, character, equippedWeapon, and attacking state
       gameState: {},
       map: map,
       maxPlayers: maxPlayers,
@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null }); // Store nickname, character, and equippedWeapon
+      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }); // Store nickname, character, equippedWeapon, and attacking state
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
@@ -129,6 +129,7 @@ io.on('connection', (socket) => {
       const playerInRoom = rooms[socket.roomId].players.find(p => p.id === socket.id);
       if (playerInRoom) {
         playerInRoom.equippedWeapon = data.equippedWeapon; // Store equipped weapon
+        playerInRoom.isAttacking = data.isAttacking; // Store attacking state
       }
       // Broadcast game updates to all other clients in the same room
       socket.to(socket.roomId).emit('gameUpdate', data);
@@ -235,6 +236,13 @@ io.on('connection', (socket) => {
         // Broadcast to all other clients in the room that this player equipped a weapon
         socket.to(socket.roomId).emit('playerEquippedWeapon', { playerId: socket.id, weaponName: weaponName });
       }
+    }
+  });
+
+  socket.on('playerAttack', (animationName) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      // Broadcast to all other clients in the room that this player attacked
+      socket.to(socket.roomId).emit('playerAttack', { playerId: socket.id, animationName: animationName });
     }
   });
 

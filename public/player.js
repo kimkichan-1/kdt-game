@@ -38,6 +38,10 @@ export const player = (() => {
       this.rollCooldown_ = 1.0;
       this.rollCooldownTimer_ = 0;
 
+      this.isAttacking_ = false; // 공격 애니메이션 재생 여부
+      this.attackCooldown_ = 0.5; // 공격 쿨다운 (초)
+      this.attackCooldownTimer_ = 0; // 공격 쿨다운 타이머
+
       this.hp_ = 100; // HP 속성 추가
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
       this.isDead_ = false; // 죽음 상태 플래그 추가
@@ -220,6 +224,21 @@ export const player = (() => {
             this.rollCooldownTimer_ = this.rollCooldown_;
           }
           break;
+        case 'KeyJ':
+          if (!this.isAttacking_ && !this.isJumping_ && !this.isRolling_ && this.attackCooldownTimer_ <= 0) {
+            let attackAnimation = 'SwordSlash'; // 기본값
+            // 무기 종류에 따라 애니메이션 선택
+            if (this.currentWeaponModel && this.currentWeaponModel.userData.weaponName) {
+              const weaponName = this.currentWeaponModel.userData.weaponName;
+              if (/Pistol|Shotgun|SniperRifle|AssaultRifle|Bow/i.test(weaponName)) {
+                attackAnimation = 'Shoot_OneHanded';
+              } else if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
+                attackAnimation = 'SwordSlash';
+              }
+            }
+            this.PlayAttackAnimation(attackAnimation);
+          }
+          break;
           /*
         case 'KeyB':
           this.keys_.debug = !this.keys_.debug;
@@ -296,6 +315,7 @@ export const player = (() => {
     SetAnimation_(name) {
       if (this.currentAnimationName_ === name) return;
       if (this.isDead_ && name !== 'Death') return;
+      if (this.isAttacking_ && name !== 'SwordSlash' && name !== 'Shoot_OneHanded') return; // 공격 중에는 다른 애니메이션 재생 방지
 
       this.currentAnimationName_ = name;
       if (this.currentAction_) {
@@ -401,6 +421,42 @@ export const player = (() => {
       }
     }
 
+    UpdateDebugVisuals() {
+      if (this.boundingBoxHelper_) {
+        this.boundingBoxHelper_.visible = this.keys_.debug;
+      }
+      if (this.params_.onDebugToggle) {
+        this.params_.onDebugToggle(this.keys_.debug);
+      }
+    }
+
+    PlayAttackAnimation(animationName) {
+      if (this.isAttacking_) return; // 이미 공격 중이면 무시
+
+      this.isAttacking_ = true;
+      this.attackCooldownTimer_ = this.attackCooldown_;
+      this.SetAnimation_(animationName);
+
+      // 애니메이션 종료 시점 처리
+      const action = this.animations_[animationName];
+      if (action) {
+        action.reset();
+        action.setLoop(THREE.LoopOnce);
+        action.clampWhenFinished = true;
+        action.play();
+
+        this.mixer_.addEventListener('finished', (e) => {
+          if (e.action === action) {
+            this.isAttacking_ = false;
+            // 공격 애니메이션이 끝나면 Idle 또는 이동 애니메이션으로 전환
+            const isMoving = this.keys_.forward || this.keys_.backward || this.keys_.left || this.keys_.right;
+            const isRunning = isMoving && this.keys_.shift;
+            this.SetAnimation_(isMoving ? (isRunning ? 'Run' : 'Walk') : 'Idle');
+          }
+        });
+      }
+    }
+
     EquipWeapon(weaponName) {
       if (!this.rightHandBone) {
         console.warn("FistR bone not found. Cannot equip weapon.");
@@ -477,6 +533,19 @@ export const player = (() => {
       if (this.rollCooldownTimer_ > 0) {
         this.rollCooldownTimer_ -= timeElapsed;
         if (this.rollCooldownTimer_ < 0) this.rollCooldownTimer_ = 0;
+      }
+
+      if (this.attackCooldownTimer_ > 0) {
+        this.attackCooldownTimer_ -= timeElapsed;
+        if (this.attackCooldownTimer_ < 0) this.attackCooldownTimer_ = 0;
+      }
+
+      // 공격 중이 아니거나, 공격 애니메이션이 끝났을 때만 이동 및 다른 애니메이션 처리
+      if (this.isAttacking_ && (this.currentAnimationName_ === 'SwordSlash' || this.currentAnimationName_ === 'Shoot_OneHanded')) {
+        if (this.mixer_) {
+          this.mixer_.update(timeElapsed);
+        }
+        return; // 공격 애니메이션 중에는 이동 및 다른 애니메이션 처리 건너뛰기
       }
 
       let newPosition = this.position_.clone();

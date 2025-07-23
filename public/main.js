@@ -314,6 +314,14 @@ export class GameStage1 {
         console.log(`Weapon ${weaponUuid} removed from scene.`);
       }
     });
+
+    this.socket.on('playerAttack', (data) => {
+      if (data.playerId === this.localPlayerId) return; // Don't update self
+      const otherPlayer = this.players[data.playerId];
+      if (otherPlayer) {
+        otherPlayer.PlayAttackAnimation(data.animationName);
+      }
+    });
   }
 
   _OnKeyDown(event) {
@@ -339,6 +347,22 @@ export class GameStage1 {
           }
         }
         break;
+      case 74: // J key
+        if (this.player_ && this.player_.mesh_) {
+          let attackAnimation = 'SwordSlash'; // 기본값
+          // 무기 종류에 따라 애니메이션 선택
+          if (this.player_.currentWeaponModel && this.player_.currentWeaponModel.userData.weaponName) {
+            const weaponName = this.player_.currentWeaponModel.userData.weaponName;
+            if (/Pistol|Shotgun|SniperRifle|AssaultRifle|Bow/i.test(weaponName)) {
+              attackAnimation = 'Shoot_OneHanded';
+            } else if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
+              attackAnimation = 'SwordSlash';
+            }
+          }
+          this.player_.PlayAttackAnimation(attackAnimation);
+          this.socket.emit('playerAttack', attackAnimation); // 서버에 공격 애니메이션 정보 전송
+        }
+        break;
     }
   }
 
@@ -360,7 +384,8 @@ export class GameStage1 {
         rotation: this.player_.mesh_.rotation.toArray(),
         animation: this.player_.currentAnimationName_, // Add animation state
         hp: this.player_.hp_, // Add HP state
-        equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.userData.weaponName : null // Add equipped weapon state
+        equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.userData.weaponName : null, // Add equipped weapon state
+        isAttacking: this.player_.isAttacking_ // Add attacking state
       });
 
       // 맵 경계 체크 및 데미지 적용
