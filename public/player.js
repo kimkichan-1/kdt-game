@@ -517,7 +517,7 @@ export const player = (() => {
         if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
           weaponModel.rotation.set(Math.PI / 2, Math.PI / 2, 0); 
         } else if (/Bow/i.test(weaponName)) { // 활인 경우 X축으로 -90도 회전
-          weaponModel.rotation.set(-Math.PI / 2, 0, 0); 
+          weaponModel.rotation.set(-Math.PI / 2, Math.PI / 2, 0); 
         } else if (/AssaultRifle|Pistol|Shotgun|SniperRifle/i.test(weaponName)) { // 나머지 원거리 무기
           weaponModel.rotation.set(Math.PI / 2, Math.PI / 2, 0); 
         } else {
