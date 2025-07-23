@@ -327,11 +327,13 @@ export class GameStage1 {
     });
 
     this.socket.on('hpUpdate', (data) => {
+      console.log(`[Main] Received hpUpdate: playerId=${data.playerId}, hp=${data.hp}`);
       const targetPlayer = (data.playerId === this.localPlayerId) ? this.player_ : this.players[data.playerId];
       if (targetPlayer) {
         const oldHp = targetPlayer.hp_;
         targetPlayer.hp_ = data.hp; // 서버에서 받은 HP로 직접 설정
         targetPlayer.hpUI.updateHP(data.hp); // UI 업데이트
+        console.log(`[Main] ${targetPlayer.nickname_}'s HP updated to: ${targetPlayer.hp_}`);
 
         if (data.hp <= 0 && !targetPlayer.isDead_) {
           targetPlayer.isDead_ = true;

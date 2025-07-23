@@ -248,21 +248,27 @@ io.on('connection', (socket) => {
   });
 
   socket.on('playerDamage', (data) => {
+    console.log(`[Server] Received playerDamage: targetId=${data.targetId}, damage=${data.damage}`);
     if (socket.roomId && rooms[socket.roomId]) {
       const room = rooms[socket.roomId];
       const targetPlayer = room.players.find(p => p.id === data.targetId);
       if (targetPlayer) {
+        console.log(`[Server] Target player found: ${targetPlayer.nickname} (HP: ${targetPlayer.hp})`);
         targetPlayer.hp -= data.damage;
         if (targetPlayer.hp < 0) targetPlayer.hp = 0;
+        console.log(`[Server] ${targetPlayer.nickname} new HP: ${targetPlayer.hp}`);
 
         // 모든 클라이언트에게 HP 업데이트 브로드캐스트
         io.to(socket.roomId).emit('hpUpdate', { playerId: targetPlayer.id, hp: targetPlayer.hp });
+        console.log(`[Server] Emitted hpUpdate: playerId=${targetPlayer.id}, hp=${targetPlayer.hp}`);
 
         if (targetPlayer.hp === 0) {
           // 사망 처리 (필요하다면 추가 로직)
           console.log(`${targetPlayer.nickname} (${targetPlayer.id}) has been defeated!`);
           // 리스폰 로직은 클라이언트에서 처리
         }
+      } else {
+        console.log(`[Server] Target player ${data.targetId} not found in room ${socket.roomId}`);
       }
     }
   });
