@@ -268,27 +268,22 @@ export class GameStage1 {
       }
       // 원격 플레이어 HP 업데이트 및 사망 처리
       if (data.hp !== undefined) {
-        const oldHp = otherPlayer.hp_;
         otherPlayer.hp_ = data.hp;
-        otherPlayer.isDead_ = data.isDead; // 서버에서 받은 isDead 상태를 직접 적용
-
         if (otherPlayer.hpUI) {
-          otherPlayer.hpUI.updateHP(otherPlayer.hp_);
+          otherPlayer.hpUI.updateHP(data.hp);
         }
-
-        if (otherPlayer.isDead_ && otherPlayer.currentAnimationName_ !== 'Death') {
+        if (data.isDead && !otherPlayer.isDead_) { // 서버에서 죽었다고 알리고 클라이언트에서 아직 죽지 않았다면
+          otherPlayer.isDead_ = true;
           otherPlayer.SetRemoteAnimation('Death');
-        } else if (!otherPlayer.isDead_ && otherPlayer.currentAnimationName_ === 'Death') {
-          // 서버에서 살아났다고 알리고 클라이언트에서 죽어있다면 리스폰 처리
+          // TODO: 원격 플레이어 사망 시 리스폰 로직 트리거 (예: 일정 시간 후 리스폰 위치로 이동)
+          // 현재는 서버에서 리스폰을 처리하지 않으므로, 클라이언트에서 임시로 처리하거나 서버 로직 추가 필요
+        } else if (!data.isDead && otherPlayer.isDead_) { // 서버에서 살아났다고 알리고 클라이언트에서 죽어있다면
           otherPlayer.hp_ = 100; // HP 초기화
           otherPlayer.isDead_ = false;
           otherPlayer.SetRemoteAnimation('Idle');
           if (otherPlayer.hpUI) {
             otherPlayer.hpUI.updateHP(100);
           }
-        } else if (otherPlayer.hp_ < oldHp && otherPlayer.hp_ > 0) {
-          // HP가 감소했고 0보다 클 때만 receievehit 애니메이션 트리거
-          otherPlayer.SetRemoteAnimation('receievehit');
         }
       }
       // 원격 플레이어 무기 장착/해제 업데이트
