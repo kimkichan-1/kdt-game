@@ -4,7 +4,7 @@ import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
-import { spawnWeaponOnMap } from './weapon.js';
+import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap, getRandomWeaponName } from './weapon.js';
 
 const socket = io();
 
@@ -46,9 +46,15 @@ export class GameStage1 {
     this.CreateGround();
     this.CreateLocalPlayer();
 
-    // 맵에 무기 생성 (테스트용)
-    const weaponPosition = this.getRandomPosition();
-    spawnWeaponOnMap(this.scene, "Sword.fbx", weaponPosition.x, weaponPosition.y, weaponPosition.z);
+    // 맵에 무기 생성
+    await loadWeaponData(); // 무기 데이터 로드를 기다립니다.
+    for (let i = 0; i < 10; i++) {
+      const randomWeaponName = getRandomWeaponName();
+      if (randomWeaponName) {
+        const weaponPosition = this.getRandomPosition();
+        spawnWeaponOnMap(this.scene, randomWeaponName, weaponPosition.x, weaponPosition.y, weaponPosition.z);
+      }
+    }
 
     // 맵 경계 정의 (80x80 맵의 절반)
     this.mapBounds = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
