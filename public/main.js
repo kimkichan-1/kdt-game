@@ -208,6 +208,7 @@ export class GameStage1 {
       scene: this.scene,
       onDebugToggle: (visible) => this.npc_.ToggleDebugVisuals(visible),
       character: localPlayerData.character,
+      nickname: localPlayerData.nickname, // 닉네임 추가
       hpUI: new hp.HPUI(this.scene, this.renderer, localPlayerData.nickname), // HPUI 인스턴스 생성 및 전달
       getRespawnPosition: () => this.getRandomPosition(),
       attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
@@ -253,6 +254,7 @@ export class GameStage1 {
         otherPlayer = new player.Player({
           scene: this.scene,
           character: remotePlayerData.character,
+          nickname: remotePlayerData.nickname, // 닉네임 추가
           isRemote: true,
           hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname), // 원격 플레이어 HPUI 생성
           attackSystem: this.attackSystem // AttackSystem 인스턴스 전달
@@ -266,21 +268,16 @@ export class GameStage1 {
       }
       // 원격 플레이어 HP 업데이트
       if (data.hp !== undefined) {
-        if (data.hp < otherPlayer.hp_) {
-          // HP가 감소했을 때만 TakeDamage 호출하여 애니메이션 트리거
-          otherPlayer.TakeDamage(otherPlayer.hp_ - data.hp);
-        } else if (data.hp === 100 && otherPlayer.isDead_) { // HP가 100으로 회복되고 죽은 상태였으면 리스폰 처리
-          otherPlayer.hp_ = data.hp;
+        otherPlayer.hp_ = data.hp;
+        if (otherPlayer.hpUI) {
+          otherPlayer.hpUI.updateHP(data.hp);
+        }
+        if (data.hp <= 0 && !otherPlayer.isDead_) {
+          otherPlayer.isDead_ = true;
+          otherPlayer.SetRemoteAnimation('Death');
+        } else if (data.hp > 0 && otherPlayer.isDead_) {
           otherPlayer.isDead_ = false;
           otherPlayer.SetRemoteAnimation('Idle');
-          if (otherPlayer.hpUI) {
-            otherPlayer.hpUI.updateHP(data.hp);
-          }
-        } else {
-          otherPlayer.hp_ = data.hp;
-          if (otherPlayer.hpUI) {
-            otherPlayer.hpUI.updateHP(data.hp);
-          }
         }
       }
       // 원격 플레이어 무기 장착/해제 업데이트

@@ -10,6 +10,7 @@ export const player = (() => {
       this.velocity_ = new THREE.Vector3(0, 0, 0);
       this.speed_ = 5;
       this.params_ = params;
+      this.nickname_ = params.nickname; // 닉네임 추가
       this.mesh_ = null;
       this.mixer_ = null;
       this.animations_ = {};
@@ -485,7 +486,7 @@ export const player = (() => {
                 angle: weapon.angle,
                 radius: weapon.radius,
                 onHit: (target) => {
-                  console.log(`${attacker.params_.nickname} hit ${target.params_.nickname || 'NPC'} with ${weapon.name}!`);
+                  console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
                 }
               });
             } else if (weapon.type === 'ranged') {
@@ -498,7 +499,7 @@ export const player = (() => {
                 radius: weapon.projectileSize,
                 speed: weapon.projectileSpeed,
                 onHit: (target) => {
-                  console.log(`${attacker.params_.nickname} hit ${target.params_.nickname || 'NPC'} with ${weapon.name}!`);
+                  console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
                 }
               });
             }

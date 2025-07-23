@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 
     rooms[roomId] = {
       id: roomId,
-      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }], // Store nickname, character, equippedWeapon, and attacking state
+      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false, hp: 100 }], // Store nickname, character, equippedWeapon, attacking state, and HP
       gameState: {},
       map: map,
       maxPlayers: maxPlayers,
@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }); // Store nickname, character, equippedWeapon, and attacking state
+      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false, hp: 100 }); // Store nickname, character, equippedWeapon, attacking state, and HP
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
@@ -130,6 +130,7 @@ io.on('connection', (socket) => {
       if (playerInRoom) {
         playerInRoom.equippedWeapon = data.equippedWeapon; // Store equipped weapon
         playerInRoom.isAttacking = data.isAttacking; // Store attacking state
+        playerInRoom.hp = data.hp; // Store HP
       }
       // Broadcast game updates to all other clients in the same room
       socket.to(socket.roomId).emit('gameUpdate', data);
