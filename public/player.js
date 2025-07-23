@@ -407,6 +407,11 @@ export const player = (() => {
         return;
       }
 
+      if (this.currentWeaponModel && this.currentWeaponModel.userData.weaponName === weaponName) {
+        console.log(`Weapon ${weaponName} is already equipped. Skipping re-equip.`);
+        return;
+      }
+
       this.UnequipWeapon(); // 기존 무기가 있다면 제거
 
       const loader = new FBXLoader();

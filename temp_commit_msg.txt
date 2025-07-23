@@ -1,13 +1,4 @@
-feat: 무기 장착 상태 동기화
+fix: 원격 플레이어 무기 장착 동기화 버그 수정
 
-- `public/player.js` 수정:
-    - `currentWeaponModel` 속성 추가.
-    - `EquipWeapon` 메서드 수정 및 `UnequipWeapon` 메서드 추가.
-- `public/main.js` 수정:
-    - 로컬 플레이어가 무기를 주웠을 때 `weaponEquipped` 이벤트 발생.
-    - `gameUpdate` 이벤트 핸들러에서 원격 플레이어의 무기 장착/해제 처리.
-    - `RAF` 함수에서 `equippedWeapon` 정보 전송.
-- `server.js` 수정:
-    - `gameUpdate` 이벤트 핸들러에서 플레이어의 `equippedWeapon` 상태 업데이트.
-    - `weaponEquipped` 이벤트 핸들러 추가.
-    - 플레이어 입장 시 `equippedWeapon` 초기화.
+- `public/player.js` 수정: `EquipWeapon` 메서드에서 로드된 `weaponModel`의 `userData`에 `weaponName`을 저장하도록 수정.
+- `public/main.js` 수정: `RAF` 함수에서 `gameUpdate` 이벤트 발생 시 `equippedWeapon` 정보를 `this.player_.currentWeaponModel.userData.weaponName`을 통해 가져오도록 수정.

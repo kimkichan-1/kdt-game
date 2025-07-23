@@ -281,10 +281,13 @@ export class GameStage1 {
       }
       // 원격 플레이어 무기 장착/해제 업데이트
       if (data.equippedWeapon !== undefined) {
-        if (data.equippedWeapon) {
-          otherPlayer.EquipWeapon(data.equippedWeapon);
-        } else {
-          otherPlayer.UnequipWeapon();
+        const currentEquippedWeapon = otherPlayer.currentWeaponModel ? otherPlayer.currentWeaponModel.userData.weaponName : null;
+        if (data.equippedWeapon !== currentEquippedWeapon) {
+          if (data.equippedWeapon) {
+            otherPlayer.EquipWeapon(data.equippedWeapon);
+          } else {
+            otherPlayer.UnequipWeapon();
+          }
         }
       }
     });
