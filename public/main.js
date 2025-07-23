@@ -421,7 +421,7 @@ export class GameStage1 {
     }
 
     // AttackSystem 업데이트
-    this.attackSystem.update(delta, this.players, [this.npc_]);
+    this.attackSystem.update(delta, Object.values(this.players), [this.npc_]);
 
     this.renderer.render(this.scene, this.camera);
   }
