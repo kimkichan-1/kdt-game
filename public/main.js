@@ -212,6 +212,7 @@ export class GameStage1 {
       hpUI: new hp.HPUI(this.scene, this.renderer, localPlayerData.nickname), // HPUI 인스턴스 생성 및 전달
       getRespawnPosition: () => this.getRandomPosition(),
       attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
+      socket: this.socket, // socket 인스턴스 전달
       onLoad: () => {
         const initialPosition = this.getRandomPosition();
         this.player_.SetPosition([initialPosition.x, initialPosition.y, initialPosition.z]);
@@ -257,7 +258,8 @@ export class GameStage1 {
           nickname: remotePlayerData.nickname, // 닉네임 추가
           isRemote: true,
           hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname), // 원격 플레이어 HPUI 생성
-          attackSystem: this.attackSystem // AttackSystem 인스턴스 전달
+          attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
+          socket: this.socket // socket 인스턴스 전달
         });
         this.players[data.playerId] = otherPlayer;
       }
@@ -321,6 +323,13 @@ export class GameStage1 {
       const otherPlayer = this.players[data.playerId];
       if (otherPlayer) {
         otherPlayer.PlayAttackAnimation(data.animationName);
+      }
+    });
+
+    this.socket.on('hpUpdate', (data) => {
+      const targetPlayer = (data.playerId === this.localPlayerId) ? this.player_ : this.players[data.playerId];
+      if (targetPlayer) {
+        targetPlayer.TakeDamage(targetPlayer.hp_ - data.hp); // TakeDamage 함수를 통해 HP 업데이트 및 애니메이션/효과 트리거
       }
     });
   }

@@ -247,6 +247,26 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('playerDamage', (data) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const room = rooms[socket.roomId];
+      const targetPlayer = room.players.find(p => p.id === data.targetId);
+      if (targetPlayer) {
+        targetPlayer.hp -= data.damage;
+        if (targetPlayer.hp < 0) targetPlayer.hp = 0;
+
+        // 모든 클라이언트에게 HP 업데이트 브로드캐스트
+        io.to(socket.roomId).emit('hpUpdate', { playerId: targetPlayer.id, hp: targetPlayer.hp });
+
+        if (targetPlayer.hp === 0) {
+          // 사망 처리 (필요하다면 추가 로직)
+          console.log(`${targetPlayer.nickname} (${targetPlayer.id}) has been defeated!`);
+          // 리스폰 로직은 클라이언트에서 처리
+        }
+      }
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     if (socket.roomId && rooms[socket.roomId]) {

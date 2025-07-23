@@ -11,6 +11,7 @@ export const player = (() => {
       this.speed_ = 5;
       this.params_ = params;
       this.nickname_ = params.nickname; // 닉네임 추가
+      this.socket_ = params.socket; // socket 인스턴스 추가
       this.mesh_ = null;
       this.mixer_ = null;
       this.animations_ = {};
@@ -487,6 +488,9 @@ export const player = (() => {
                 radius: weapon.radius,
                 onHit: (target) => {
                   console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
+                  if (this.socket_ && target.params_.isRemote) { // 원격 플레이어에게만 데미지 이벤트 전송
+                    this.socket_.emit('playerDamage', { targetId: target.params_.playerId, damage: weapon.damage });
+                  }
                 }
               });
             } else if (weapon.type === 'ranged') {
@@ -500,6 +504,9 @@ export const player = (() => {
                 speed: weapon.projectileSpeed,
                 onHit: (target) => {
                   console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
+                  if (this.socket_ && target.params_.isRemote) { // 원격 플레이어에게만 데미지 이벤트 전송
+                    this.socket_.emit('playerDamage', { targetId: target.params_.playerId, damage: weapon.damage });
+                  }
                 }
               });
             }
