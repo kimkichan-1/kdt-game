@@ -1,0 +1,6 @@
+feat: 맵에 중복 없는 무기 10개 스폰 기능 재구현
+
+- `public/weapon.js`를 수정하여 `WEAPON_DATA`와 `loadWeaponData`를 외부로 export.
+- `Weapon` 클래스 생성자에서 중복 로딩 로직 제거.
+- `public/main.js`에 `spawnWeapons` 함수를 추가하여 `WEAPON_DATA`에서 무작위로 10개의 고유한 무기를 선택하고 맵에 배치.
+- 버프 아이템은 무기 스폰에서 제외.

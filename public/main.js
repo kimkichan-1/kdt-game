@@ -4,17 +4,18 @@ import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
-import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap, getRandomWeaponName } from './weapon.js';
+import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap } from './weapon.js';
 
 const socket = io();
 
 export class GameStage1 {
-  constructor(socket, players, map) {
+  constructor(socket, players, map, spawnedWeapons) {
     this.socket = socket;
     this.players = {}; // To store other players' objects
     this.localPlayerId = socket.id;
     this.playerInfo = players;
     this.map = map;
+    this.spawnedWeapons = spawnedWeapons; // Store spawned weapons data
 
     this.Initialize();
     this.RAF();
@@ -46,17 +47,12 @@ export class GameStage1 {
     this.CreateGround();
     this.CreateLocalPlayer();
 
-    // 맵에 무기 생성
-    await loadWeaponData(); // 무기 데이터 로드를 기다립니다.
-    for (let i = 0; i < 10; i++) {
-      const randomWeaponName = getRandomWeaponName();
-      if (randomWeaponName) {
-        const weaponPosition = this.getRandomPosition();
-        spawnWeaponOnMap(this.scene, randomWeaponName, weaponPosition.x, weaponPosition.y, weaponPosition.z);
-      }
-    }
+    
 
-    // 맵 경계 정의 (80x80 맵의 절반)
+    await loadWeaponData(); // 무기 데이터 로드를 기다립니다.
+    for (const weaponData of this.spawnedWeapons) {
+      spawnWeaponOnMap(this.scene, weaponData.weaponName, weaponData.x, weaponData.y, weaponData.z);
+    }
     this.mapBounds = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
     this.damageTimer = 0;
     this.damageInterval = 0.5; // 0.5초마다 데미지
@@ -636,7 +632,7 @@ socket.on('updatePlayers', (players, maxPlayers) => {
 socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage1(socket, gameInfo.players, gameInfo.map);
+  new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
 });
 
 socket.on('roomError', (message) => {

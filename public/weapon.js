@@ -15,8 +15,7 @@ export async function loadWeaponData() {
     }
 }
 
-// 페이지 로드 시 무기 데이터 로드
-loadWeaponData();
+
 
 export class Weapon {
     constructor(scene, weaponName, position = new THREE.Vector3(0, 0, 0)) {

@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const { getRandomWeaponName } = require('./weaponUtils');
 
 const app = express();
 const server = http.createServer(app);
@@ -139,7 +140,22 @@ io.on('connection', (socket) => {
         const allReady = room.players.every(p => p.ready);
         if (allReady && room.players.length > 0) {
           room.status = 'playing'; // Change room status to playing
-          io.to(socket.roomId).emit('startGame', { players: room.players, map: room.map });
+
+          // Generate random weapon positions and names
+          const spawnedWeapons = [];
+          for (let i = 0; i < 10; i++) {
+            const weaponName = getRandomWeaponName();
+            if (weaponName) {
+              // Generate random positions within a reasonable range for the map
+              const x = Math.random() * 100 - 50; // Example range
+              const y = 0; // Assuming weapons are on the ground
+              const z = Math.random() * 100 - 50; // Example range
+              spawnedWeapons.push({ weaponName, x, y, z });
+            }
+          }
+          room.gameState.spawnedWeapons = spawnedWeapons; // Store in gameState
+
+          io.to(socket.roomId).emit('startGame', { players: room.players, map: room.map, spawnedWeapons: spawnedWeapons });
         } else {
           socket.emit('roomError', '모든 플레이어가 준비되지 않았습니다.');
         }
