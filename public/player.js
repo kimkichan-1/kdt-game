@@ -428,6 +428,7 @@ export const player = (() => {
 
         this.rightHandBone.add(weaponModel);
         this.currentWeaponModel = weaponModel;
+        this.currentWeaponModel.userData.weaponName = weaponName; // 무기 이름 저장
         console.log(`Player equipped weapon: ${weaponName}`);
       }, undefined, (error) => {
         console.error(`Error loading weapon model ${weaponName}:`, error);

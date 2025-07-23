@@ -357,7 +357,7 @@ export class GameStage1 {
         rotation: this.player_.mesh_.rotation.toArray(),
         animation: this.player_.currentAnimationName_, // Add animation state
         hp: this.player_.hp_, // Add HP state
-        equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.name : null // Add equipped weapon state
+        equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.userData.weaponName : null // Add equipped weapon state
       });
 
       // 맵 경계 체크 및 데미지 적용
