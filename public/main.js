@@ -255,9 +255,7 @@ export class GameStage1 {
           character: remotePlayerData.character,
           isRemote: true,
           hpUI: new hp.HPUI(this.scene, this.renderer, remotePlayerData.nickname), // 원격 플레이어 HPUI 생성
-          attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
-          initialHp: remotePlayerData.hp, // 초기 HP 전달
-          initialIsDead: remotePlayerData.isDead // 초기 isDead 상태 전달
+          attackSystem: this.attackSystem // AttackSystem 인스턴스 전달
         });
         this.players[data.playerId] = otherPlayer;
       }
@@ -266,23 +264,22 @@ export class GameStage1 {
       if (data.animation) {
         otherPlayer.SetRemoteAnimation(data.animation);
       }
-      // 원격 플레이어 HP 업데이트 및 사망 처리
+      // 원격 플레이어 HP 업데이트
       if (data.hp !== undefined) {
-        otherPlayer.hp_ = data.hp;
-        if (otherPlayer.hpUI) {
-          otherPlayer.hpUI.updateHP(data.hp);
-        }
-        if (data.isDead && !otherPlayer.isDead_) { // 서버에서 죽었다고 알리고 클라이언트에서 아직 죽지 않았다면
-          otherPlayer.isDead_ = true;
-          otherPlayer.SetRemoteAnimation('Death');
-          // TODO: 원격 플레이어 사망 시 리스폰 로직 트리거 (예: 일정 시간 후 리스폰 위치로 이동)
-          // 현재는 서버에서 리스폰을 처리하지 않으므로, 클라이언트에서 임시로 처리하거나 서버 로직 추가 필요
-        } else if (!data.isDead && otherPlayer.isDead_) { // 서버에서 살아났다고 알리고 클라이언트에서 죽어있다면
-          otherPlayer.hp_ = 100; // HP 초기화
+        if (data.hp < otherPlayer.hp_) {
+          // HP가 감소했을 때만 TakeDamage 호출하여 애니메이션 트리거
+          otherPlayer.TakeDamage(otherPlayer.hp_ - data.hp);
+        } else if (data.hp === 100 && otherPlayer.isDead_) { // HP가 100으로 회복되고 죽은 상태였으면 리스폰 처리
+          otherPlayer.hp_ = data.hp;
           otherPlayer.isDead_ = false;
           otherPlayer.SetRemoteAnimation('Idle');
           if (otherPlayer.hpUI) {
-            otherPlayer.hpUI.updateHP(100);
+            otherPlayer.hpUI.updateHP(data.hp);
+          }
+        } else {
+          otherPlayer.hp_ = data.hp;
+          if (otherPlayer.hpUI) {
+            otherPlayer.hpUI.updateHP(data.hp);
           }
         }
       }
@@ -391,7 +388,6 @@ export class GameStage1 {
         rotation: this.player_.mesh_.rotation.toArray(),
         animation: this.player_.currentAnimationName_, // Add animation state
         hp: this.player_.hp_, // Add HP state
-        isDead: this.player_.isDead_, // Add isDead state
         equippedWeapon: this.player_.currentWeaponModel ? this.player_.currentWeaponModel.userData.weaponName : null, // Add equipped weapon state
         isAttacking: this.player_.isAttacking_ // Add attacking state
       });
