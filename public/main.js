@@ -21,7 +21,7 @@ export class GameStage1 {
     this.SetupSocketEvents();
   }
 
-  Initialize() {
+  async Initialize() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
