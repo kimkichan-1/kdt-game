@@ -19,9 +19,7 @@ function updateRoomPlayers(roomId) {
       id: p.id,
       nickname: p.nickname, // Add nickname
       ready: p.ready,
-      character: p.character, // Add character
-      hp: p.hp, // Add hp
-      isDead: p.isDead // Add isDead
+      character: p.character // Add character
     }));
     io.to(roomId).emit('updatePlayers', playersData, rooms[roomId].maxPlayers);
   }
@@ -55,7 +53,7 @@ io.on('connection', (socket) => {
 
     rooms[roomId] = {
       id: roomId,
-      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false, hp: 100, isDead: false }], // Store nickname, character, equippedWeapon, attacking state, hp, and isDead
+      players: [{ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }], // Store nickname, character, equippedWeapon, and attacking state
       gameState: {},
       map: map,
       maxPlayers: maxPlayers,
@@ -94,7 +92,7 @@ io.on('connection', (socket) => {
         return;
       }
       socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false, hp: 100, isDead: false }); // Store nickname, character, equippedWeapon, attacking state, hp, and isDead
+      rooms[roomId].players.push({ id: socket.id, ready: false, nickname: nickname, character: character, equippedWeapon: null, isAttacking: false }); // Store nickname, character, equippedWeapon, and attacking state
       socket.roomId = roomId;
       console.log(`${socket.id} joined room: ${roomId}`);
       socket.emit('roomJoined', { id: roomId, name: rooms[roomId].name, map: rooms[roomId].map });
@@ -132,8 +130,6 @@ io.on('connection', (socket) => {
       if (playerInRoom) {
         playerInRoom.equippedWeapon = data.equippedWeapon; // Store equipped weapon
         playerInRoom.isAttacking = data.isAttacking; // Store attacking state
-        playerInRoom.hp = data.hp; // Update player HP
-        playerInRoom.isDead = data.isDead; // Update player isDead state
       }
       // Broadcast game updates to all other clients in the same room
       socket.to(socket.roomId).emit('gameUpdate', data);
