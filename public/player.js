@@ -43,9 +43,9 @@ export const player = (() => {
       this.attackCooldown_ = 0.5; // 공격 쿨다운 (초)
       this.attackCooldownTimer_ = 0; // 공격 쿨다운 타이머
 
-      this.hp_ = 100; // HP 속성 추가
+      this.hp_ = params.initialHp !== undefined ? params.initialHp : 100; // HP 속성 추가
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
-      this.isDead_ = false; // 죽음 상태 플래그 추가
+      this.isDead_ = params.initialIsDead !== undefined ? params.initialIsDead : false; // 죽음 상태 플래그 추가
       this.respawnDelay_ = 3; // 리스폰 딜레이 (초) 5초에서 4초로 변경
       this.respawnTimer_ = 0; // 리스폰 타이머
       this.currentWeaponModel = null; // 현재 장착된 무기 모델
