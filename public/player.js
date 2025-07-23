@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
 
 export const player = (() => {
   class Player {
@@ -256,6 +257,9 @@ export const player = (() => {
           if (c.isBone && c.name === 'Head') { // Head bone 찾기
             this.headBone = c;
           }
+          if (c.isBone && c.name === 'FistR') { // FistR bone 찾기
+            this.rightHandBone = c;
+          }
         });
 
         // 고정된 크기의 바운딩 박스 초기화
@@ -397,8 +401,40 @@ export const player = (() => {
     }
 
     EquipWeapon(weaponName) {
-      console.log(`Player equipped weapon: ${weaponName}`);
-      // 여기에 무기 모델을 플레이어에게 부착하는 로직 등을 추가할 수 있습니다.
+      if (!this.rightHandBone) {
+        console.warn("FistR bone not found. Cannot equip weapon.");
+        return;
+      }
+
+      // 기존 무기가 있다면 제거
+      if (this.currentWeaponModel) {
+        this.rightHandBone.remove(this.currentWeaponModel);
+        this.currentWeaponModel = null;
+      }
+
+      const loader = new FBXLoader();
+      loader.setPath('./resources/weapon/FBX/');
+
+      loader.load(weaponName, (fbx) => {
+        const weaponModel = fbx;
+
+        // KDTgames-main/item.js의 스케일 로직 참고
+        if (/AssaultRifle|Pistol|Shotgun|SniperRifle|SubmachineGun/i.test(weaponName)) {
+          weaponModel.scale.setScalar(0.005);
+        } else {
+          weaponModel.scale.setScalar(0.01);
+        }
+
+        // 무기 위치 및 회전 조정 (캐릭터 모델에 따라 다를 수 있음)
+        weaponModel.position.set(0, 0, 0); // 뼈대 기준으로 위치 조정
+        weaponModel.rotation.set(0, 0, 0); // 뼈대 기준으로 회전 조정
+
+        this.rightHandBone.add(weaponModel);
+        this.currentWeaponModel = weaponModel;
+        console.log(`Player equipped weapon: ${weaponName}`);
+      }, undefined, (error) => {
+        console.error(`Error loading weapon model ${weaponName}:`, error);
+      });
     }
 
     Update(timeElapsed, rotationAngle = 0, collidables = []) {
