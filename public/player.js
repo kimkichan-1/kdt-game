@@ -48,6 +48,8 @@ export const player = (() => {
       this.respawnDelay_ = 3; // 리스폰 딜레이 (초) 5초에서 4초로 변경
       this.respawnTimer_ = 0; // 리스폰 타이머
       this.currentWeaponModel = null; // 현재 장착된 무기 모델
+      this.originalWeaponRotation_ = null; // 무기 원래 회전 값 저장
+      this.onAnimationFinished_ = null; // 애니메이션 종료 시 실행될 콜백
 
       this.LoadModel_(params.character);
       if (!params.isRemote) {
@@ -445,15 +447,39 @@ export const player = (() => {
         action.clampWhenFinished = true;
         action.play();
 
-        this.mixer_.addEventListener('finished', (e) => {
+        // SwordSlash 애니메이션 시작 시 무기 회전 초기화
+        if (animationName === 'SwordSlash' && this.currentWeaponModel) {
+          const weaponName = this.currentWeaponModel.userData.weaponName;
+          if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
+            this.originalWeaponRotation_ = this.currentWeaponModel.rotation.clone();
+            this.currentWeaponModel.rotation.set(0, 0, 0);
+          }
+        }
+
+        // 기존 리스너가 있다면 제거
+        if (this.onAnimationFinished_) {
+          this.mixer_.removeEventListener('finished', this.onAnimationFinished_);
+        }
+
+        // 새로운 리스너 추가
+        this.onAnimationFinished_ = (e) => {
           if (e.action === action) {
             this.isAttacking_ = false;
             // 공격 애니메이션이 끝나면 Idle 또는 이동 애니메이션으로 전환
             const isMoving = this.keys_.forward || this.keys_.backward || this.keys_.left || this.keys_.right;
             const isRunning = isMoving && this.keys_.shift;
             this.SetAnimation_(isMoving ? (isRunning ? 'Run' : 'Walk') : 'Idle');
+
+            // SwordSlash 애니메이션 종료 시 무기 회전 복원
+            if (animationName === 'SwordSlash' && this.currentWeaponModel && this.originalWeaponRotation_) {
+              this.currentWeaponModel.rotation.copy(this.originalWeaponRotation_);
+              this.originalWeaponRotation_ = null; // 초기화
+            }
+            this.mixer_.removeEventListener('finished', this.onAnimationFinished_);
+            this.onAnimationFinished_ = null;
           }
-        });
+        };
+        this.mixer_.addEventListener('finished', this.onAnimationFinished_);
       }
     }
 
