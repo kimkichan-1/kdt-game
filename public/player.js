@@ -486,7 +486,13 @@ export const player = (() => {
 
         // 무기 위치 및 회전 조정 (캐릭터 모델에 따라 다를 수 있음)
         weaponModel.position.set(0, 0, 0); // 뼈대 기준으로 위치 조정
-        weaponModel.rotation.set(0, 0, 0); // 뼈대 기준으로 회전 조정
+        
+        // 근접 무기인 경우 Y축으로 90도 회전
+        if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
+          weaponModel.rotation.set(0, Math.PI / 2, 0); 
+        } else {
+          weaponModel.rotation.set(0, 0, 0); // 뼈대 기준으로 회전 조정
+        }
 
         this.rightHandBone.add(weaponModel);
         this.currentWeaponModel = weaponModel;

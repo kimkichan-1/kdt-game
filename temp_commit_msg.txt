@@ -1,16 +1,3 @@
-feat: J 키를 이용한 공격 모션 구현 및 동기화
+fix: 공격 모션 중 움직임 제한 해제
 
-- `public/player.js` 수정:
-    - `isAttacking_`, `attackCooldown_`, `attackCooldownTimer_` 속성 추가.
-    - `PlayAttackAnimation(animationName)` 메서드 구현.
-    - `OnKeyDown_` 메서드에서 'J' 키 입력 처리 및 `PlayAttackAnimation` 호출.
-    - `SetAnimation_` 메서드에서 공격 애니메이션 중 다른 애니메이션 재생 방지.
-    - `Update` 메서드에서 `attackCooldownTimer_` 업데이트 및 공격 중 이동/애니메이션 처리 건너뛰기.
-- `public/main.js` 수정:
-    - `_OnKeyDown` (J 키 처리 부분)에서 `this.player_.PlayAttackAnimation(...)` 호출 후, `playerAttack` 이벤트를 서버로 전송.
-    - `SetupSocketEvents`에 `playerAttack` 이벤트 리스너를 추가하여 원격 플레이어의 공격 애니메이션을 재생.
-    - `RAF`에서 `gameUpdate` 이벤트를 보낼 때 `isAttacking_`를 포함.
-- `server.js` 수정:
-    - `gameUpdate` 이벤트 핸들러에서 `isAttacking` 상태를 저장하도록 수정.
-    - `playerAttack` 이벤트 리스너를 추가하여 클라이언트로부터 공격 애니메이션 정보를 수신하고, 이 정보를 동일한 방에 있는 다른 클라이언트에게 브로드캐스트.
-    - 플레이어 입장 시 `isAttacking` 속성 초기화.
+- `public/player.js` 수정: `Update` 메서드에서 공격 애니메이션 중에 플레이어의 움직임을 막던 로직 제거.
