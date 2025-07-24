@@ -252,7 +252,7 @@ export const player = (() => {
     }
 
     OnKeyUp_(event) {
-      if (this.hp_ <= 0) return; // 죽었으면 입력 무시
+      if (this.isDead_) return; // 죽었으면 입력 무시
       switch (event.code) {
         case 'KeyW': this.keys_.forward = false; break;
         case 'KeyS': this.keys_.backward = false; break;
