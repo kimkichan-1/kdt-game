@@ -441,7 +441,10 @@ export class GameStage1 {
       ) {
         this.damageTimer += delta;
         if (this.damageTimer >= this.damageInterval) {
-          this.player_.TakeDamage(this.damageAmount);
+          const newHp = this.player_.hp_ - this.damageAmount;
+          this.player_.TakeDamage(newHp); // TakeDamage 함수에 새로운 HP 값 전달
+          this.player_.hp_ = newHp; // 실제 HP 값 업데이트
+          this.player_.hpUI.updateHP(newHp); // HP UI 업데이트
           this.damageTimer = 0;
         }
       } else {
