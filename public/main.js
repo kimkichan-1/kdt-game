@@ -4,7 +4,7 @@ import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
-import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap } from './weapon.js';
+import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap, getRandomWeaponName } from './weapon.js';
 import { AttackSystem } from './attackSystem.js';
 
 const socket = io();
