@@ -177,7 +177,7 @@
         "rarity": "legendary",
         "description": "정확하고 강력한 황금 활입니다.",
         "projectileSpeed": 40,
-        "projectileSize": 0.5,
+        "projectileSize": 0.3,
         "projectileEffect": "piercing",
         "knockbackStrength": 0.2,
         "knockbackDuration": 0.1
@@ -276,7 +276,7 @@
         "name": "권총",
         "type": "ranged", 
         "category": "light",
-        "radius": 10.0, 
+        "radius": 5.0, 
         "angle": 0.2617993877991494, 
         "damage": 20, 
         "attackSpeedMultiplier": 2.0, 
@@ -294,7 +294,9 @@
         "rarity": "common",
         "description": "빠른 재장전이 가능한 권총입니다.",
         "knockbackStrength": 0.1,
-        "knockbackDuration": 0.08
+        "knockbackDuration": 0.08,
+        "projectileSize": 0.3,
+        "projectileSpeed": 40
     },
     "SubmachineGun_1.fbx": { 
         "id": "smg",
@@ -319,15 +321,18 @@
         "rarity": "rare",
         "description": "연사가 가능한 기관단총입니다.",
         "knockbackStrength": 0.05,
-        "knockbackDuration": 0.05
+        "knockbackDuration": 0.05,
+        "projectileSize": 0.3,
+        "projectileSpeed": 40
     },
     "Shotgun_1.fbx": { 
         "id": "shotgun",
         "name": "샷건",
         "type": "ranged", 
         "category": "medium",
-        "radius": 8.0, 
+        "radius": 5.0, 
         "angle": 0.5235987755982988, 
+        "range": 8.0, 
         "damage": 35, 
         "attackSpeedMultiplier": 1.5, 
         "attackType": "ranged", 
@@ -344,7 +349,9 @@
         "rarity": "rare",
         "description": "산탄 효과를 가진 샷건입니다.",
         "knockbackStrength": 0.6,
-        "knockbackDuration": 0.2
+        "knockbackDuration": 0.2,
+        "projectileSize": 0.8,
+        "projectileSpeed": 40
     },
     "SniperRifle_1.fbx": { 
         "id": "sniper",
@@ -369,7 +376,9 @@
         "rarity": "epic",
         "description": "최고 정확도를 가진 저격총입니다.",
         "knockbackStrength": 0.3,
-        "knockbackDuration": 0.15
+        "knockbackDuration": 0.15,
+        "projectileSize": 0.3,
+        "projectileSpeed": 40
     },
     "AssaultRifle_1.fbx": { 
         "id": "assault",
@@ -394,7 +403,9 @@
         "rarity": "epic",
         "description": "다목적 성능을 가진 돌격소총입니다.",
         "knockbackStrength": 0.15,
-        "knockbackDuration": 0.1
+        "knockbackDuration": 0.1,
+        "projectileSize": 0.3,
+        "projectileSpeed": 40
     },
     "Bow_Wooden.fbx": { 
         "id": "bow",
@@ -419,7 +430,9 @@
         "rarity": "common",
         "description": "정확한 활입니다.",
         "knockbackStrength": 0.25,
-        "knockbackDuration": 0.12
+        "knockbackDuration": 0.12,
+        "projectileSize": 0.3,
+        "projectileSpeed": 40
     },
 
     "Potion1_Filled.fbx": { 
