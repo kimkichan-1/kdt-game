@@ -188,8 +188,16 @@ io.on('connection', (socket) => {
             attacker.kills++;
         }
 
-        io.to(socket.roomId).emit('updateScores', room.players.map(p => ({ id: p.id, kills: p.kills, deaths: p.deaths })));
-        io.to(socket.roomId).emit('killFeed', { attackerName: attacker ? attacker.nickname : 'World', victimName: victim.nickname });
+        let attackerName = 'World';
+        if (attacker) {
+            if (attacker.id === victim.id) {
+                attackerName = victim.nickname; // 자살 시 자신의 닉네임 표시
+            } else {
+                attackerName = attacker.nickname;
+            }
+        }
+        io.to(socket.roomId).emit('updateScores', room.players.map(p => ({ id: p.id, nickname: p.nickname, kills: p.kills, deaths: p.deaths })));
+        io.to(socket.roomId).emit('killFeed', { attackerName: attackerName, victimName: victim.nickname });
     }
   });
 
