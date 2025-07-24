@@ -456,6 +456,7 @@ export const player = (() => {
     }
 
     PlayAttackAnimation(animationName) {
+      if (this.isDead_) return; // 죽은 상태에서는 공격 불가
       if (this.isAttacking_) return; // 이미 공격 중이면 무시
 
       this.isAttacking_ = true;
