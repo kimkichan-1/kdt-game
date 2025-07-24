@@ -27,6 +27,11 @@ export class MeleeProjectile {
   }
 
   createDebugMesh() {
+    // 근접 공격(sector, aerial)의 디버그 메시는 생성하지 않음
+    if (this.type === 'sector' || this.type === 'aerial') {
+      return null;
+    }
+
     let color = 0xff0000; // 기본 빨간색
     let geometry;
 

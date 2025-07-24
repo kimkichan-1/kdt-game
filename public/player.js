@@ -519,7 +519,7 @@ export const player = (() => {
                 attacker: attacker,
                 type: 'sector',
                 angle: weapon.angle,
-                radius: weapon.radius,
+                radius: weapon.radius + 1,
                 onHit: (target) => {
                   console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
                   if (this.socket_ && target.params_.isRemote) { // 원격 플레이어에게만 데미지 이벤트 전송
