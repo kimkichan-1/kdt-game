@@ -472,6 +472,7 @@ export const player = (() => {
             const attackDirection = new THREE.Vector3();
             this.mesh_.getWorldDirection(attackDirection);
             attackDirection.negate(); // 모델의 Z축이 반대 방향이므로 뒤집음
+            attackDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI); // Y축 기준으로 180도 회전
 
             if (weapon.type === 'melee') {
               this.attackSystem_.spawnMeleeProjectile({
