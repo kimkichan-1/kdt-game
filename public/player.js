@@ -145,9 +145,9 @@ export const player = (() => {
         }, 100); // 0.1초 동안 표시
       }
 
-      // HP가 0보다 클 때만 receievehit 애니메이션 재생
+      // HP가 0보다 클 때만 RecieveHit 애니메이션 재생
       if (newHp > 0) {
-        this.SetAnimation_('receievehit'); // receievehit 애니메이션 재생
+        this.SetAnimation_('RecieveHit'); // RecieveHit 애니메이션 재생
       }
 
       // 사망 처리 (HP가 0이 되었을 때만)

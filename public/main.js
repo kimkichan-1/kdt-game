@@ -366,9 +366,9 @@ export class GameStage1 {
               targetPlayer.hitEffect.style.opacity = '0';
             }, 100);
           }
-          // 죽지 않았을 경우 receievehit 애니메이션 트리거
+          // 죽지 않았을 경우 RecieveHit 애니메이션 트리거
           if (targetPlayer.hp_ > 0) {
-            targetPlayer.SetAnimation_('receievehit');
+            targetPlayer.SetAnimation_('RecieveHit');
           }
         }
       }
