@@ -3,7 +3,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 
 export class MeleeProjectile {
-  constructor({ scene, position, direction, weapon, attacker, onHit, type = 'circle', angle = Math.PI / 2, radius = 3, speed }) {
+  constructor({ scene, position, direction, weapon, attacker, onHit, type = 'circle', angle = Math.PI / 2, radius = 3, speed, startWidth }) {
     this.scene = scene;
     this.position = position.clone();
     this.direction = direction.clone().normalize();
@@ -20,6 +20,7 @@ export class MeleeProjectile {
     this.projectileEffect = weapon.projectileEffect || null;
     this.hitTargets = new Set(); // 이미 타격한 대상을 저장하여 중복 타격 방지
     this.lifeTime = 0.2; // 근접 공격 디버그 메시 유지 시간 (초)
+    this.startWidth = (weapon.startWidth !== undefined) ? weapon.startWidth : (startWidth || 1.0); // 시작 선 너비 추가
 
     // 디버그 시각화: 항상 생성
     this.debugMesh = this.createDebugMesh();
@@ -29,63 +30,77 @@ export class MeleeProjectile {
   createDebugMesh() {
     // 근접 공격(sector, aerial)의 디버그 메시는 생성하지 않음
     if (this.type === 'sector' || this.type === 'aerial') {
-      return null;
-    }
-
-    let color = 0xff0000; // 기본 빨간색
-    let geometry;
-
-    if (this.type === 'circle') {
-      // 원거리 투사체 (구)
-      geometry = new THREE.SphereGeometry(this.radius, 16, 16);
-      if (this.projectileEffect === 'piercing') color = 0x00ff00; // 관통: 초록
-      else if (this.projectileEffect === 'explosion') color = 0x0000ff; // 폭발: 파랑
-      else color = 0xffaa00; // 일반 원거리: 주황
-    } else if (this.type === 'sector' || this.type === 'aerial') {
-      // 근접 공격 (부채꼴)
-      // 부채꼴 모양의 Geometry 생성
+      let color = 0xff0000; // 근접: 빨강
       const segments = 32;
-      geometry = new THREE.BufferGeometry();
+      const geometry = new THREE.BufferGeometry();
       const positions = [];
       const indices = [];
 
-      positions.push(0, 0, 0); // Center
+      // 시작 선의 양 끝점 (투사체 방향을 고려하여 X축에 평행하게 놓음)
+      const startHalfWidth = this.startWidth / 2;
+      positions.push(-startHalfWidth, 0, 0); // Index 0 (P0: 시작 왼쪽)
+      positions.push(startHalfWidth, 0, 0);  // Index 1 (P1: 시작 오른쪽)
 
+      // 끝 호의 점들
       for (let i = 0; i <= segments; i++) {
         const segmentAngle = (this.angle / 2) * (2 * i / segments - 1); // -angle/2 to +angle/2
         const x = this.radius * Math.sin(segmentAngle);
         const z = this.radius * Math.cos(segmentAngle);
-        positions.push(x, 0, z);
+        positions.push(x, 0, z); // Index 2, 3, ... (Q_i)
       }
 
+      // 인덱스 구성: 사다리꼴 형태
+      // 시작 선과 첫 번째 호 세그먼트 연결
+      // 정점: P0(0), P1(1), Q0(2), Q1(3)
+      indices.push(0, 1, 3); // 삼각형 1: P0, P1, Q1
+      indices.push(0, 3, 2); // 삼각형 2: P0, Q1, Q0
+
+      // 나머지 호 세그먼트들을 연결하여 사다리꼴을 만듭니다.
       for (let i = 0; i < segments; i++) {
-        indices.push(0, i + 1, i + 2);
+        const current_q_idx = i + 2;     // 현재 호의 시작점 인덱스 (Q_i)
+        const next_q_idx = i + 3;        // 다음 호의 끝점 인덱스 (Q_i+1)
+
+        // 사다리꼴의 두 삼각형: (Q_i, Q_i+1, P1), (Q_i, P1, P0)
+        indices.push(current_q_idx, next_q_idx, 1); // 삼각형 1: Q_i, Q_i+1, P1
+        indices.push(current_q_idx, 1, 0);          // 삼각형 2: Q_i, P1, P0
       }
 
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
       geometry.setIndex(new THREE.Uint16BufferAttribute(indices, 1));
       geometry.computeVertexNormals();
 
-      color = 0xff0000; // 근접: 빨강
-    } else {
-      // 기본 박스 (fallback)
-      geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    }
+      const material = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.5 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(this.position);
 
-    const material = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.5 });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.copy(this.position);
-
-    // 투사체 방향에 따라 메시 회전 (부채꼴의 경우)
-    if (this.type === 'sector' || this.type === 'aerial') {
+      // 투사체 방향에 따라 메시 회전 (부채꼴의 경우)
       const angleToDirection = Math.atan2(this.direction.x, this.direction.z);
       mesh.rotation.y = angleToDirection;
-    }
 
-    return mesh;
+      return mesh;
+    } else if (this.type === 'circle') {
+      // 원거리 투사체 (구)
+      let color = 0xff0000; // 기본 빨간색
+      const geometry = new THREE.SphereGeometry(this.radius, 16, 16);
+      if (this.projectileEffect === 'piercing') color = 0x00ff00; // 관통: 초록
+      else if (this.projectileEffect === 'explosion') color = 0x0000ff; // 폭발: 파랑
+      else color = 0xffaa00; // 일반 원거리: 주황
+
+      const material = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.5 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(this.position);
+      return mesh;
+    } else {
+      // 기본 박스 (fallback)
+      const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0.5 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(this.position);
+      return mesh;
+    }
   }
 
-  // 부채꼴 판정 함수
+  // 부채꼴 판정 함수 (이 함수는 시작점이 선으로 변경되어도 동일하게 작동합니다.)
   isInSector(targetPos) {
     const toTarget = targetPos.clone().sub(this.position);
     toTarget.y = 0; // Y축 무시
