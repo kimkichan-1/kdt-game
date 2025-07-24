@@ -153,10 +153,11 @@ export const player = (() => {
       // 사망 처리 (HP가 0이 되었을 때만)
       if (newHp === 0 && !this.isDead_) {
         this.isDead_ = true; // 죽음 상태로 설정
+        this.isAttacking_ = false; // 공격 중단
         this.SetAnimation_('Death'); // Death 애니메이션 재생
         if (!this.params_.isRemote) {
           this.DisableInput_(); // 키 입력 비활성화
-          this.respawnTimer_ = this.respawnDelay_; // 리스폰 타이머 초기화
+          this.respawnTimer_ = this.respawnDelay_;
 
           if (this.overlay) {
             this.overlay.style.visibility = 'visible';
@@ -186,7 +187,7 @@ export const player = (() => {
     }
 
     OnKeyDown_(event) {
-      if (this.hp_ <= 0) return; // 죽었으면 입력 무시
+      if (this.isDead_) return; // 죽었으면 입력 무시
       switch (event.code) {
         case 'KeyW': this.keys_.forward = true; break;
         case 'KeyS': this.keys_.backward = true; break;
@@ -317,7 +318,28 @@ export const player = (() => {
 
     SetAnimation_(name) {
       if (this.currentAnimationName_ === name) return;
-      if (this.isDead_ && name !== 'Death') return;
+      if (name === 'Death') { // Death 애니메이션은 항상 재생
+        this.currentAnimationName_ = name;
+        if (this.currentAction_) {
+          this.currentAction_.fadeOut(0.3);
+        }
+        const newAction = this.animations_[name];
+        if (newAction) {
+          this.currentAction_ = newAction;
+          this.currentAction_.reset().fadeIn(0.3).play();
+          this.currentAction_.setLoop(THREE.LoopOnce);
+          this.currentAction_.clampWhenFinished = true;
+        } else {
+          console.warn(`Animation "${name}" not found for character. Falling back to Idle.`);
+          this.currentAction_ = this.animations_['Idle']; // Fallback to Idle
+          if (this.currentAction_) {
+            this.currentAction_.reset().fadeIn(0.3).play();
+          }
+          this.currentAnimationName_ = 'Idle'; // Update current animation name to Idle
+        }
+        return;
+      }
+      if (this.isDead_) return; // 죽은 상태에서는 Death 애니메이션 외 다른 애니메이션 재생 방지
       if (this.isAttacking_ && name !== 'SwordSlash' && name !== 'Shoot_OneHanded') return; // 공격 중에는 다른 애니메이션 재생 방지
 
       this.currentAnimationName_ = name;
