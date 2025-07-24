@@ -472,12 +472,23 @@ export const player = (() => {
 
         // 공격 판정 발생 시점 (애니메이션에 따라 조절 필요)
         // 예: SwordSlash 애니메이션의 0.2초 지점에서 공격 판정
-        if (this.equippedWeaponData_ && this.attackSystem_) {
+        if (this.attackSystem_) {
           const attackDelay = 0.2; // 공격 판정 발생까지의 딜레이 (초)
           setTimeout(() => {
             if (!this.isAttacking_) return; // 공격이 취소되었으면 실행하지 않음
 
-            const weapon = this.equippedWeaponData_;
+            let weapon = this.equippedWeaponData_; // 현재 장착된 무기 데이터
+            if (!weapon) { // 무기가 장착되지 않았을 경우 기본 맨손 공격 설정
+              weapon = {
+                name: 'Fist',
+                type: 'melee',
+                damage: 10,
+                radius: 1.5, // Dagger.fbx와 동일한 범위
+                angle: 1.5707963267948966, // Dagger.fbx와 동일한 범위
+                projectileSize: 0.5, // 원거리 무기용 (맨손 공격에는 사용되지 않음)
+                projectileSpeed: 20, // 원거리 무기용 (맨손 공격에는 사용되지 않음)
+              };
+            }
             const attacker = this; // 공격자 자신
 
             // 무기 끝 위치 계산 (대략적인 위치)
