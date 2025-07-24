@@ -209,6 +209,20 @@ export const player = (() => {
             this.animations_['Roll'] &&
             this.rollCooldownTimer_ <= 0
           ) {
+            // 공격 중 구르기 시 공격 취소
+            if (this.isAttacking_) {
+              this.isAttacking_ = false;
+              // 진행 중인 공격 애니메이션의 콜백 제거
+              if (this.onAnimationFinished_) {
+                this.mixer_.removeEventListener('finished', this.onAnimationFinished_);
+                this.onAnimationFinished_ = null;
+              }
+              // 현재 공격 애니메이션을 빠르게 페이드 아웃
+              if (this.currentAction_) {
+                this.currentAction_.fadeOut(0.1);
+              }
+            }
+
             this.isRolling_ = true;
             this.rollTimer_ = this.rollDuration_;
             const moveDir = new THREE.Vector3();
