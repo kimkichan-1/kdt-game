@@ -476,7 +476,7 @@ export class GameStage1 {
         this.damageTimer += delta;
         if (this.damageTimer >= this.damageInterval) {
           if (!this.player_.isDead_) { // 플레이어가 죽은 상태가 아닐 때만 데미지 적용
-            this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount });
+            this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount, attackerId: this.localPlayerId });
           }
           this.damageTimer = 0;
         }
