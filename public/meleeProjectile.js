@@ -134,9 +134,11 @@ export class MeleeProjectile {
     }
 
     // 원거리(circle) 타입 이동 및 판정
-    const moveDist = this.speed * delta;
-    this.position.addScaledVector(this.direction, moveDist);
-    this.traveled += moveDist;
+    if (this.type === 'circle') {
+      const moveDist = this.speed * delta;
+      this.position.addScaledVector(this.direction, moveDist);
+      this.traveled += moveDist;
+    }
 
     for (const target of targets) {
       // 공격자와 같은 대상은 타격하지 않음

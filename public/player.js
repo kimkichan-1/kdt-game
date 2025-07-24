@@ -476,7 +476,13 @@ export const player = (() => {
         // 공격 판정 발생 시점 (애니메이션에 따라 조절 필요)
         // 예: SwordSlash 애니메이션의 0.2초 지점에서 공격 판정
         if (this.attackSystem_) {
-          const attackDelay = 0.2; // 공격 판정 발생까지의 딜레이 (초)
+          let actualAttackDelay = 0.2; // 기본값 (원거리)
+          if (this.equippedWeaponData_ && this.equippedWeaponData_.type === 'melee') {
+              actualAttackDelay = 0.4; // 근접 무기
+          } else if (!this.equippedWeaponData_) { // 맨손 공격
+              actualAttackDelay = 0.4;
+          }
+
           setTimeout(() => {
             if (!this.isAttacking_) return; // 공격이 취소되었으면 실행하지 않음
 
@@ -494,15 +500,10 @@ export const player = (() => {
             }
             const attacker = this; // 공격자 자신
 
-            // 무기 끝 위치 계산 (대략적인 위치)
+            // 공격 위치를 항상 플레이어의 중앙으로 설정
             const attackPosition = new THREE.Vector3();
-            if (this.currentWeaponModel) {
-              this.currentWeaponModel.getWorldPosition(attackPosition);
-            } else {
-              // 무기가 없으면 플레이어 전방에서 공격
-              this.mesh_.getWorldPosition(attackPosition);
-              attackPosition.y += 1.0; // 플레이어 높이 고려
-            }
+            this.mesh_.getWorldPosition(attackPosition);
+            attackPosition.y += 1.5; // 캐릭터의 가슴 높이 정도로 조정
 
             // 공격 방향 계산 (플레이어의 현재 바라보는 방향)
             const attackDirection = new THREE.Vector3();
@@ -545,7 +546,7 @@ export const player = (() => {
                 }
               });
             }
-          }, attackDelay * 1000);
+          }, actualAttackDelay * 1000);
         }
 
         // SwordSlash 애니메이션 시작 시 무기 회전 초기화
