@@ -46,7 +46,6 @@ export const player = (() => {
       this.attackCooldownTimer_ = 0; // 공격 쿨다운 타이머
 
       this.hp_ = 100; // HP 속성 추가
-      this.originalMaterials = new Map(); // 원래 재질을 저장할 Map
       this.hpUI = params.hpUI || null; // HPUI 인스턴스 받기
       this.isDead_ = false; // 죽음 상태 플래그 추가
       this.respawnDelay_ = 3; // 리스폰 딜레이 (초) 5초에서 4초로 변경
@@ -136,6 +135,7 @@ export const player = (() => {
 
     TakeDamage(newHp) {
       // HP 값은 main.js에서 서버로부터 받은 값으로 직접 업데이트되므로, 여기서는 시각적 효과만 처리
+      // this.hp_ = newHp; // 이 줄은 main.js에서 처리
 
       // 피격 효과 (로컬 플레이어에게만 적용)
       if (!this.params_.isRemote && this.hitEffect) {
@@ -143,22 +143,6 @@ export const player = (() => {
         setTimeout(() => {
           this.hitEffect.style.opacity = '0';
         }, 100); // 0.1초 동안 표시
-      }
-
-      // 캐릭터 붉은색 효과
-      if (this.mesh_) {
-        this.mesh_.traverse((c) => {
-          if (c.isMesh) {
-            c.material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // 붉은색으로 변경
-          }
-        });
-        setTimeout(() => {
-          this.mesh_.traverse((c) => {
-            if (c.isMesh) {
-              c.material = this.originalMaterials.get(c.uuid); // 원래 재질로 복원
-            }
-          });
-        }, 150); // 0.15초 후에 원래 색상으로 복원
       }
 
       // HP가 0보다 클 때만 receievehit 애니메이션 재생
@@ -293,8 +277,6 @@ export const player = (() => {
           if (c.isMesh) {
             c.castShadow = true;
             c.receiveShadow = true;
-            // 원래 재질 저장
-            this.originalMaterials.set(c.uuid, c.material);
           }
           if (c.isBone && c.name === 'Head') { // Head bone 찾기
             this.headBone = c;
