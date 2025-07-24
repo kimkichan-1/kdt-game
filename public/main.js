@@ -441,10 +441,9 @@ export class GameStage1 {
       ) {
         this.damageTimer += delta;
         if (this.damageTimer >= this.damageInterval) {
-          const newHp = this.player_.hp_ - this.damageAmount;
-          this.player_.TakeDamage(newHp); // TakeDamage 함수에 새로운 HP 값 전달
-          this.player_.hp_ = newHp; // 실제 HP 값 업데이트
-          this.player_.hpUI.updateHP(newHp); // HP UI 업데이트
+          if (!this.player_.isDead_) { // 플레이어가 죽은 상태가 아닐 때만 데미지 적용
+            this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount });
+          }
           this.damageTimer = 0;
         }
       } else {
