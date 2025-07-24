@@ -1,10 +1,6 @@
-fix: 플레이어 간 HP 동기화 및 피격 효과 개선
+feat: 피격 시 캐릭터 붉은빛 효과 추가
 
-- `public/main.js`:
-    - `Player` 생성자에 `socket` 인스턴스를 전달합니다.
-    - `hpUpdate` 이벤트를 수신하여 해당 플레이어의 HP를 업데이트하고, 로컬 플레이어인 경우 `TakeDamage`를 호출하여 피격 효과를 트리거합니다.
 - `public/player.js`:
-    - `Player` 클래스에 `socket_` 속성을 추가합니다.
-    - `onHit` 콜백에서 `target.TakeDamage()`를 직접 호출하는 대신, 서버에 `playerDamage` 이벤트를 전송하여 데미지 정보를 알립니다.
-- `server.js`:
-    - `playerDamage` 이벤트를 수신하여 피격자의 HP를 서버 측에서 업데이트하고, 업데이트된 HP 및 사망 상태를 포함하는 `hpUpdate` 이벤트를 방의 모든 클라이언트에게 브로드캐스트합니다.
+    - `Player` 클래스에 `originalMaterials` 속성을 추가하여 캐릭터의 원래 재질을 저장합니다.
+    - `LoadModel_` 함수에서 모델 로드 후, 캐릭터 메시의 원래 재질을 저장합니다.
+    - `TakeDamage` 메서드에서 데미지를 받았을 때 캐릭터 메시의 재질 색상을 붉은색으로 변경하고, 짧은 시간 후에 원래 재질로 복원하는 로직을 추가합니다.

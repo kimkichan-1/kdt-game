@@ -1,3 +1,0 @@
-fix: 근접 무기 장착 시 X축 회전 추가
-
-- `public/player.js` 수정: `EquipWeapon` 메서드에서 근접 무기 장착 시 X축으로 -90도 회전 추가.
