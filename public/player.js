@@ -409,6 +409,12 @@ export const player = (() => {
     Respawn_() {
       this.hp_ = 100; // 체력 초기화
       this.isDead_ = false; // 죽음 상태 해제
+
+      // 현재 재생 중인 애니메이션이 있다면 즉시 중지
+      if (this.currentAction_) {
+        this.currentAction_.stop();
+      }
+
       if (this.hpUI) {
         this.hpUI.updateHP(this.hp_); // HPUI 업데이트
       }
