@@ -386,6 +386,7 @@ export const player = (() => {
       this.InitInput_(); // 입력 활성화
       this.SetAnimation_('Idle'); // Idle 애니메이션으로 설정
       this.UnequipWeapon(); // 무기 장착 해제
+      this.equippedWeaponData_ = null; // 장착된 무기 데이터 초기화
       if (this.params_.getRespawnPosition) {
         const respawnPosition = this.params_.getRespawnPosition();
         this.SetPosition([respawnPosition.x, respawnPosition.y, respawnPosition.z]);
