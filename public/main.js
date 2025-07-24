@@ -438,6 +438,7 @@ export class GameStage1 {
   }
 
   _OnKeyUp(event) {
+    if (!this.isInputEnabled) return;
     if (event.code === 'Tab') {
         document.getElementById('scoreboard').style.display = 'none';
     }
@@ -786,23 +787,30 @@ socket.on('updatePlayers', (players, maxPlayers) => {
   }
 });
 
-socket.on('startGame', (gameInfo) => {
-  waitingRoom.style.display = 'none';
-  controls.style.display = 'block';
-  document.getElementById('gameUiContainer').style.display = 'block';
-  const gameStartCountdown = document.getElementById('gameStartCountdown');
-  let count = 3;
-  gameStartCountdown.textContent = `잠시 후 게임이 시작됩니다... ${count}`;
-  const countdownInterval = setInterval(() => {
-    count--;
+  socket.on('startGame', (gameInfo) => {
+    waitingRoom.style.display = 'none';
+    controls.style.display = 'block';
+    document.getElementById('gameUiContainer').style.display = 'block';
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const gameStartCountdown = document.getElementById('gameStartCountdown');
+    countdownOverlay.style.display = 'flex'; // 카운트다운 오버레이 표시
+    let count = 3;
     gameStartCountdown.textContent = `잠시 후 게임이 시작됩니다... ${count}`;
-    if (count === 0) {
-      clearInterval(countdownInterval);
-      gameStartCountdown.style.display = 'none';
-      new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
-    }
-  }, 1000);
-});
+    
+    // GameStage1 인스턴스를 미리 생성하고 입력 비활성화
+    const gameStage = new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
+    gameStage.player_.SetGameInputEnabled(false); // 플레이어 입력 비활성화
+
+    const countdownInterval = setInterval(() => {
+      count--;
+      gameStartCountdown.textContent = `잠시 후 게임이 시작됩니다... ${count}`;
+      if (count === 0) {
+        clearInterval(countdownInterval);
+        countdownOverlay.style.display = 'none'; // 카운트다운 오버레이 숨기기
+        gameStage.player_.SetGameInputEnabled(true); // 플레이어 입력 활성화
+      }
+    }, 1000);
+  });
 
 socket.on('updateTimer', (time) => {
     const minutes = Math.floor(time / 60);

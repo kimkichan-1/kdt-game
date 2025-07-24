@@ -391,6 +391,10 @@ export const player = (() => {
       }
     }
 
+    SetGameInputEnabled(enabled) {
+      this.isGameInputEnabled_ = enabled;
+    }
+
     Respawn_() {
       this.hp_ = 100; // 체력 초기화
       this.isDead_ = false; // 죽음 상태 해제

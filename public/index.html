@@ -731,7 +731,9 @@
   <!-- In-game UI Elements -->
   <div id="gameUiContainer" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
     <!-- Game Start Countdown -->
-    <div id="gameStartCountdown" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
+    <div id="countdownOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 101;">
+      <div id="gameStartCountdown" style="font-size: 50px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
+    </div>
 
     <!-- In-game Timer -->
     <div id="timer" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 36px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
