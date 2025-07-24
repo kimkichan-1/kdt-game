@@ -65,6 +65,7 @@ export class GameStage1 {
 
     window.addEventListener('resize', () => this.OnWindowResize(), false);
     document.addEventListener('keydown', (e) => this._OnKeyDown(e), false);
+    document.addEventListener('keyup', (e) => this._OnKeyUp(e), false);
   }
 
   SetupLighting() {
@@ -346,6 +347,7 @@ export class GameStage1 {
           targetPlayer.isDead_ = true;
           targetPlayer.SetAnimation_('Death');
           if (data.playerId === this.localPlayerId) { // 로컬 플레이어인 경우에만 사망 UI 및 타이머 트리거
+            this.socket.emit('playerKilled', { victimId: data.playerId, attackerId: data.attackerId });
             targetPlayer.DisableInput_();
             targetPlayer.respawnTimer_ = targetPlayer.respawnDelay_;
             if (targetPlayer.overlay) {
@@ -374,6 +376,10 @@ export class GameStage1 {
   }
 
   _OnKeyDown(event) {
+    if (event.code === 'Tab') {
+        event.preventDefault();
+        document.getElementById('scoreboard').style.display = 'block';
+    }
     switch (event.keyCode) {
       case 69: // E key
         if (this.player_ && this.player_.mesh_) {
@@ -428,6 +434,12 @@ export class GameStage1 {
           this.socket.emit('playerAttack', attackAnimation); // 서버에 공격 애니메이션 정보 전송
         }
         break;
+    }
+  }
+
+  _OnKeyUp(event) {
+    if (event.code === 'Tab') {
+        document.getElementById('scoreboard').style.display = 'none';
     }
   }
 
@@ -777,7 +789,84 @@ socket.on('updatePlayers', (players, maxPlayers) => {
 socket.on('startGame', (gameInfo) => {
   waitingRoom.style.display = 'none';
   controls.style.display = 'block';
-  new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
+  document.getElementById('gameUiContainer').style.display = 'block';
+  const gameStartCountdown = document.getElementById('gameStartCountdown');
+  let count = 3;
+  gameStartCountdown.textContent = `잠시 후 게임이 시작됩니다... ${count}`;
+  const countdownInterval = setInterval(() => {
+    count--;
+    gameStartCountdown.textContent = `잠시 후 게임이 시작됩니다... ${count}`;
+    if (count === 0) {
+      clearInterval(countdownInterval);
+      gameStartCountdown.style.display = 'none';
+      new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
+    }
+  }, 1000);
+});
+
+socket.on('updateTimer', (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+socket.on('updateScores', (scores) => {
+    const scoreboardBody = document.querySelector('#scoreboardTable tbody');
+    scoreboardBody.innerHTML = '';
+    scores.forEach(player => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="padding: 10px;">${player.nickname}</td>
+            <td style="padding: 10px;">${player.kills}</td>
+            <td style="padding: 10px;">${player.deaths}</td>
+        `;
+        scoreboardBody.appendChild(row);
+    });
+});
+
+socket.on('killFeed', (data) => {
+    const killFeed = document.getElementById('killFeed');
+    const killMessage = document.createElement('div');
+    killMessage.textContent = `${data.attackerName} killed ${data.victimName}`;
+    killMessage.style.color = 'white';
+    killMessage.style.marginBottom = '5px';
+    killFeed.appendChild(killMessage);
+    setTimeout(() => {
+        killFeed.removeChild(killMessage);
+    }, 5000);
+});
+
+socket.on('gameEnd', (finalScores) => {
+    const gameEndScreen = document.getElementById('gameEndScreen');
+    const finalScoreboard = document.getElementById('finalScoreboard');
+    const finalScoreboardTable = document.createElement('table');
+    finalScoreboardTable.style.color = 'white';
+    finalScoreboardTable.style.width = '400px';
+    finalScoreboardTable.style.borderCollapse = 'collapse';
+    finalScoreboardTable.innerHTML = `
+        <thead>
+            <tr>
+                <th style="padding: 10px; border-bottom: 1px solid white;">Player</th>
+                <th style="padding: 10px; border-bottom: 1px solid white;">Kills</th>
+                <th style="padding: 10px; border-bottom: 1px solid white;">Deaths</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${finalScores.map(player => `
+                <tr>
+                    <td style="padding: 10px;">${player.nickname}</td>
+                    <td style="padding: 10px;">${player.kills}</td>
+                    <td style="padding: 10px;">${player.deaths}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+    finalScoreboard.innerHTML = '';
+    finalScoreboard.appendChild(finalScoreboardTable);
+    gameEndScreen.style.display = 'flex';
+    document.getElementById('backToLobbyButton').addEventListener('click', () => {
+        window.location.reload();
+    });
 });
 
 socket.on('roomError', (message) => {

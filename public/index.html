@@ -728,6 +728,41 @@
     <button id="joinRoomMainButton">방 참가</button>
   </div>
 
+  <!-- In-game UI Elements -->
+  <div id="gameUiContainer" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+    <!-- Game Start Countdown -->
+    <div id="gameStartCountdown" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
+
+    <!-- In-game Timer -->
+    <div id="timer" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 36px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
+
+    <!-- Kill/Death Log (Kill Feed) -->
+    <div id="killFeed" style="position: absolute; top: 20px; right: 20px; width: 300px; text-align: right;"></div>
+
+    <!-- Scoreboard (Tab) -->
+    <div id="scoreboard" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px;">
+      <table id="scoreboardTable" style="color: white; width: 400px; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="padding: 10px; border-bottom: 1px solid white;">Player</th>
+            <th style="padding: 10px; border-bottom: 1px solid white;">Kills</th>
+            <th style="padding: 10px; border-bottom: 1px solid white;">Deaths</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Player scores will be added here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Game End Screen -->
+    <div id="gameEndScreen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; flex-direction: column;">
+      <h2 style="font-size: 48px; color: white;">Game Over</h2>
+      <div id="finalScoreboard"></div>
+      <button id="backToLobbyButton" style="padding: 15px 30px; font-size: 24px; margin-top: 20px;">대기실로 돌아가기</button>
+    </div>
+  </div>
+
   <!-- Join Room Popup -->
   <div id="joinRoomPopup" class="popup-overlay" style="display: none;">
     <div class="popup-content">
