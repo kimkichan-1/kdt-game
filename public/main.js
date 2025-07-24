@@ -319,6 +319,12 @@ export class GameStage1 {
       }
     });
 
+    this.socket.on('weaponSpawned', (weaponData) => {
+      const weapon = spawnWeaponOnMap(this.scene, weaponData.weaponName, weaponData.x, weaponData.y, weaponData.z, weaponData.uuid);
+      this.spawnedWeaponObjects.push(weapon);
+      console.log(`Weapon ${weaponData.uuid} spawned on scene.`);
+    });
+
     this.socket.on('playerAttack', (data) => {
       if (data.playerId === this.localPlayerId) return; // Don't update self
       const otherPlayer = this.players[data.playerId];
@@ -384,6 +390,22 @@ export class GameStage1 {
                 this.player_.EquipWeapon(weapon.weaponName); // Equip the weapon
                 this.socket.emit('weaponEquipped', weapon.weaponName); // 서버에 무기 장착 정보 전송
                 pickedUp = true;
+
+                // 새로운 무기 스폰 로직 추가
+                const newWeaponName = getRandomWeaponName();
+                if (newWeaponName) {
+                  const newSpawnPosition = this.getRandomPosition();
+                  const newWeaponUuid = THREE.MathUtils.generateUUID(); // 새로운 무기 UUID 생성
+                  const newWeapon = spawnWeaponOnMap(this.scene, newWeaponName, newSpawnPosition.x, newSpawnPosition.y, newSpawnPosition.z, newWeaponUuid);
+                  this.spawnedWeaponObjects.push(newWeapon);
+                  this.socket.emit('weaponSpawned', {
+                    weaponName: newWeaponName,
+                    x: newSpawnPosition.x,
+                    y: newSpawnPosition.y,
+                    z: newSpawnPosition.z,
+                    uuid: newWeaponUuid
+                  });
+                }
                 break;
               }
             }

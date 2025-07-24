@@ -229,6 +229,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('weaponSpawned', (weaponData) => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      let spawnedWeapons = rooms[socket.roomId].gameState.spawnedWeapons;
+      if (spawnedWeapons) {
+        spawnedWeapons.push(weaponData);
+        io.to(socket.roomId).emit('weaponSpawned', weaponData);
+      }
+    }
+  });
+
   socket.on('weaponEquipped', (weaponName) => {
     if (socket.roomId && rooms[socket.roomId]) {
       const playerInRoom = rooms[socket.roomId].players.find(p => p.id === socket.id);
