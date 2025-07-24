@@ -393,6 +393,17 @@ export const player = (() => {
 
     SetGameInputEnabled(enabled) {
       this.isGameInputEnabled_ = enabled;
+      if (!enabled) {
+        // 모든 키 상태 초기화
+        this.keys_ = {
+          forward: false,
+          backward: false,
+          left: false,
+          right: false,
+          shift: false,
+          debug: false,
+        };
+      }
     }
 
     Respawn_() {
@@ -679,6 +690,18 @@ export const player = (() => {
         return;
       }
       if (!this.mesh_) return;
+
+      if (!this.isGameInputEnabled_) { // 게임 입력 비활성화 시 업데이트 로직 건너뛰기
+        // 애니메이션 업데이트는 계속 진행 (Idle 애니메이션 유지)
+        if (this.mixer_) {
+          this.mixer_.update(timeElapsed);
+        }
+        // HPUI 위치 업데이트
+        if (this.hpUI) {
+          this.hpUI.updatePosition();
+        }
+        return;
+      }
 
       if (this.isDead_) {
         this.respawnTimer_ -= timeElapsed;
