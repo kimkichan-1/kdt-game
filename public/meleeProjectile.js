@@ -11,7 +11,7 @@ export class MeleeProjectile {
     this.attacker = attacker;
     this.onHit = onHit;
     this.speed = (speed !== undefined) ? speed : (weapon.projectileSpeed !== undefined ? weapon.projectileSpeed : 20);
-    this.range = weapon.range || weapon.attackRadius || 2.0;
+    this.range = weapon.range || weapon.attackRadius || 10.0;
     this.traveled = 0;
     this.radius = (weapon.projectileSize !== undefined) ? weapon.projectileSize : (radius || weapon.radius || 3);
     this.angle = angle || weapon.angle || Math.PI / 2;
