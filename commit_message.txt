@@ -1,0 +1,4 @@
+Fix: Scoreboard and kill log issues
+
+- Display player's nickname instead of 'World' in kill log on self-kill.
+- Fix 'undefined' nickname in scoreboard by sending nickname information from server.
