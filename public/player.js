@@ -529,9 +529,8 @@ export const player = (() => {
                 damage: 10,
                 radius: 1.5, // Dagger.fbx와 동일한 범위
                 angle: 1.5707963267948966, // Dagger.fbx와 동일한 범위
-                projectileSize: 0.5, // 원거리 무기용 (맨손 공격에는 사용되지 않음)
-                projectileSpeed: 20, // 원거리 무기용 (맨손 공격에는 사용되지 않음)
               };
+              
             }
             const attacker = this; // 공격자 자신
 
@@ -554,7 +553,7 @@ export const player = (() => {
                 attacker: attacker,
                 type: 'sector',
                 angle: weapon.angle,
-                radius: weapon.radius + 1,
+                radius: weapon.radius,
                 onHit: (target) => {
                   console.log(`${attacker.nickname_} hit ${target.nickname_ || 'NPC'} with ${weapon.name}!`);
                   if (this.socket_ && target.params_.isRemote) { // 원격 플레이어에게만 데미지 이벤트 전송
