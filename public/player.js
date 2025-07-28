@@ -375,7 +375,7 @@ export const player = (() => {
           this.currentAction_.clampWhenFinished = true;
           this.currentAction_.time = 0.0;
           this.currentAction_.timeScale = 1.2;
-        } else if (name === 'Pickup') {
+        } else if (name === 'PickUp') {
           this.currentAction_.setLoop(THREE.LoopOnce);
           this.currentAction_.clampWhenFinished = true;
           this.currentAction_.time = 0.0;

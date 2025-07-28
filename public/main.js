@@ -426,7 +426,7 @@ export class GameStage1 {
                 this.socket.emit('weaponPickedUp', weapon.uuid);
                 this.player_.EquipWeapon(weapon.weaponName); // Equip the weapon
                 this.socket.emit('weaponEquipped', weapon.weaponName); // 서버에 무기 장착 정보 전송
-                this.player_.SetAnimation_('Pickup'); // Pickup 애니메이션 재생
+                this.player_.SetAnimation_('PickUp'); // PickUp 애니메이션 재생
                 pickedUp = true;
 
                 // 새로운 무기 스폰 로직 추가
