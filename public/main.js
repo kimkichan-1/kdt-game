@@ -1,7 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js';
 import { player } from './player.js';
-import { object } from './object.js';
 import { math } from './math.js';
 import { hp } from './hp.js'; // hp.js 임포트
 import { WEAPON_DATA, loadWeaponData, spawnWeaponOnMap, getRandomWeaponName } from './weapon.js';
@@ -18,10 +17,6 @@ export class GameStage1 {
     this.map = map;
     this.spawnedWeapons = spawnedWeapons; // Store spawned weapons data
     this.spawnedWeaponObjects = []; // Store actual Weapon instances
-
-    this.Initialize();
-    this.RAF();
-    this.SetupSocketEvents();
   }
 
   async Initialize() {
@@ -48,6 +43,14 @@ export class GameStage1 {
     this.SetupSkyAndFog();
     this.CreateGround();
     this.attackSystem = new AttackSystem(this.scene); // AttackSystem 인스턴스 생성
+    
+    const objectFile = this.map === 'map3' ? './island-object.js' : './object.js';
+    const { object } = await import(objectFile);
+    this.objectModule = object;
+
+    this.npc_ = new this.objectModule.NPC(this.scene);
+    await this.npc_.init();
+
     this.CreateLocalPlayer();
 
     
@@ -148,6 +151,37 @@ export class GameStage1 {
     const playerHalfDepth = 0.65; // player.js의 halfDepth
     const playerHeight = 3.2; // player.js의 halfHeight * 2
 
+    if (this.map === 'map3') {
+      const sandObjects = this.npc_.GetCollidables().filter(c => c.model.userData.filename === 'square_sand.gltf.glb');
+      if (sandObjects.length > 0) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const randomSandObject = sandObjects[Math.floor(Math.random() * sandObjects.length)];
+          const sandBox = randomSandObject.boundingBox;
+          const x = Math.random() * (sandBox.max.x - sandBox.min.x) + sandBox.min.x;
+          const z = Math.random() * (sandBox.max.z - sandBox.min.z) + sandBox.min.z;
+          const y = sandBox.max.y;
+
+          const tempPlayerBox = new THREE.Box3(
+            new THREE.Vector3(x - playerHalfWidth, y, z - playerHalfDepth),
+            new THREE.Vector3(x + playerHalfWidth, y + playerHeight, z + playerHalfDepth)
+          );
+
+          let isColliding = false;
+          for (const collidable of this.npc_.GetCollidables()) {
+            if (collidable !== randomSandObject && tempPlayerBox.intersectsBox(collidable.boundingBox)) {
+              isColliding = true;
+              break;
+            }
+          }
+
+          if (!isColliding) {
+            return new THREE.Vector3(x, y, z);
+          }
+        }
+      }
+    }
+
+    // Fallback for other maps or if no suitable position is found
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const x = Math.random() * 80 - 40;
       const z = Math.random() * 80 - 40;
@@ -200,9 +234,6 @@ export class GameStage1 {
   }
 
   CreateLocalPlayer() {
-    const npcPos = new THREE.Vector3(0, 0, -4);
-    this.npc_ = new object.NPC(this.scene, npcPos);
-
     const localPlayerData = this.playerInfo.find(p => p.id === this.localPlayerId);
 
     this.player_ = new player.Player({
@@ -468,21 +499,35 @@ export class GameStage1 {
 
       // 맵 경계 체크 및 데미지 적용
       const playerPos = this.player_.mesh_.position;
-      if (
-        playerPos.x < this.mapBounds.minX ||
-        playerPos.x > this.mapBounds.maxX ||
-        playerPos.z < this.mapBounds.minZ ||
-        playerPos.z > this.mapBounds.maxZ
-      ) {
-        this.damageTimer += delta;
-        if (this.damageTimer >= this.damageInterval) {
-          if (!this.player_.isDead_) { // 플레이어가 죽은 상태가 아닐 때만 데미지 적용
-            this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount, attackerId: this.localPlayerId });
+      if (this.map === 'map3') {
+        if (playerPos.y < 2) {
+          this.damageTimer += delta;
+          if (this.damageTimer >= this.damageInterval) {
+            if (!this.player_.isDead_) { // 플레이어가 죽은 상태가 아닐 때만 데미지 적용
+              this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount, attackerId: this.localPlayerId });
+            }
+            this.damageTimer = 0;
           }
+        } else {
           this.damageTimer = 0;
         }
       } else {
-        this.damageTimer = 0; // 맵 안으로 들어오면 타이머 초기화
+        if (
+          playerPos.x < this.mapBounds.minX ||
+          playerPos.x > this.mapBounds.maxX ||
+          playerPos.z < this.mapBounds.minZ ||
+          playerPos.z > this.mapBounds.maxZ
+        ) {
+          this.damageTimer += delta;
+          if (this.damageTimer >= this.damageInterval) {
+            if (!this.player_.isDead_) { // 플레이어가 죽은 상태가 아닐 때만 데미지 적용
+              this.socket.emit('playerDamage', { targetId: this.localPlayerId, damage: this.damageAmount, attackerId: this.localPlayerId });
+            }
+            this.damageTimer = 0;
+          }
+        } else {
+          this.damageTimer = 0; // 맵 안으로 들어오면 타이머 초기화
+        }
       }
 
       // HP UI 업데이트
@@ -787,7 +832,7 @@ socket.on('updatePlayers', (players, maxPlayers) => {
   }
 });
 
-  socket.on('startGame', (gameInfo) => {
+  socket.on('startGame', async (gameInfo) => {
     waitingRoom.style.display = 'none';
     controls.style.display = 'block';
     document.getElementById('gameUiContainer').style.display = 'block';
@@ -799,6 +844,9 @@ socket.on('updatePlayers', (players, maxPlayers) => {
     
     // GameStage1 인스턴스를 미리 생성하고 입력 비활성화
     const gameStage = new GameStage1(socket, gameInfo.players, gameInfo.map, gameInfo.spawnedWeapons);
+    await gameStage.Initialize();
+    gameStage.RAF();
+    gameStage.SetupSocketEvents();
     gameStage.player_.SetGameInputEnabled(false); // 플레이어 입력 비활성화
 
     const countdownInterval = setInterval(() => {
@@ -841,11 +889,11 @@ socket.on('killFeed', (data) => {
     killMessage.style.marginBottom = '5px';
 
     killMessage.innerHTML = `
-        <img src="./resources/character/${data.attackerCharacter}.png" alt="${data.attackerName}" style="width: 20px; height: 20px; margin-right: 5px; border-radius: 50%;">
-        <span>${data.attackerName}</span>
-        <span style="margin: 0 5px;">killed</span>
-        <img src="./resources/character/${data.victimCharacter}.png" alt="${data.victimName}" style="width: 20px; height: 20px; margin-right: 5px; border-radius: 50%;">
-        <span>${data.victimName}</span>
+        <img src="./resources/character/${data.attackerCharacter}.png" alt="${data.attackerName}" style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
+        <span style="font-size: 22px;">${data.attackerName}</span>
+        <img src="./resources/knife_icon.png" alt="killed" style="width: 40px; height: 40px; margin: 0 10px;">
+        <img src="./resources/character/${data.victimCharacter}.png" alt="${data.victimName}" style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
+        <span style="font-size: 22px;">${data.victimName}</span>
     `;
 
     killFeed.appendChild(killMessage);

@@ -141,14 +141,37 @@ io.on('connection', (socket) => {
           room.gameState.gameStarted = true;
 
           const spawnedWeapons = [];
-          for (let i = 0; i < 10; i++) {
-            const weaponName = getRandomWeaponName();
-            if (weaponName) {
-              const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-              const x = Math.random() * 80 - 40;
-              const y = 1;
-              const z = Math.random() * 80 - 40;
-              spawnedWeapons.push({ uuid, weaponName, x, y, z });
+          if (room.map === 'map3') {
+            const islandSpawnAreas = [
+              // Main island area
+              { minX: -5, maxX: 25, minZ: -20, maxZ: 25 },
+              // Bottom right island area
+              { minX: 20, maxX: 60, minZ: -45, maxZ: -15 },
+              // Top right island area
+              { minX: 30, maxX: 50, minZ: 5, maxZ: 20 }
+            ];
+
+            for (let i = 0; i < 10; i++) {
+              const weaponName = getRandomWeaponName();
+              if (weaponName) {
+                const area = islandSpawnAreas[Math.floor(Math.random() * islandSpawnAreas.length)];
+                const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const x = Math.random() * (area.maxX - area.minX) + area.minX;
+                const y = 5; // Weapons now spawn at y=5
+                const z = Math.random() * (area.maxZ - area.minZ) + area.minZ;
+                spawnedWeapons.push({ uuid, weaponName, x, y, z });
+              }
+            }
+          } else {
+            for (let i = 0; i < 10; i++) {
+              const weaponName = getRandomWeaponName();
+              if (weaponName) {
+                const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const x = Math.random() * 80 - 40;
+                const y = 5; // Weapons now spawn at y=5
+                const z = Math.random() * 80 - 40;
+                spawnedWeapons.push({ uuid, weaponName, x, y, z });
+              }
             }
           }
           room.gameState.spawnedWeapons = spawnedWeapons;

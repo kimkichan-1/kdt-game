@@ -50,6 +50,11 @@ export class Weapon {
             }
             model.position.copy(position);
 
+            // 모델의 바운딩 박스를 계산하여 y 위치 조정
+            const bbox = new THREE.Box3().setFromObject(model);
+            model.position.y -= bbox.min.y; // 모델의 최저 y값을 0으로 맞춤
+            model.position.y += position.y; // 원하는 y 위치로 이동
+
             model.traverse((c) => {
                 if (c.isMesh) {
                     c.castShadow = true;
