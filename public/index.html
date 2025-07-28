@@ -730,6 +730,9 @@
 
   <!-- In-game UI Elements -->
   <div id="gameUiContainer" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+    <!-- Crosshair -->
+    <div id="crosshair" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background-color: white; border-radius: 50%; z-index: 1000;"></div>
+
     <!-- Game Start Countdown -->
     <div id="countdownOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 101;">
       <div id="gameStartCountdown" style="font-size: 50px; color: white; text-shadow: 2px 2px 4px #000000;"></div>
@@ -1158,8 +1161,9 @@
   <div id="controls" style="display: none;">
     <p>WASD: 이동</p>
     <p>Shift: 달리기</p>
-    <p>K: 점프</p>
-    <p>L: 구르기</p>
+    <p>SpaceBar: 점프</p>
+    <p>C: 구르기</p>
+    <p>E: 줍기</p>
   </div>
   <div id="container"></div>
 

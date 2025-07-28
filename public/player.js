@@ -195,14 +195,14 @@ export const player = (() => {
         case 'KeyD': this.keys_.right = true; break;
         case 'ShiftLeft':
         case 'ShiftRight': this.keys_.shift = true; break;
-        case 'KeyK':
-          if (!this.isJumping_ && !this.isRolling_) {
+        case 'Space': // Space key
+          if (!this.isJumping_ && !this.isRolling_){
             this.isJumping_ = true;
             this.velocityY_ = this.jumpPower_;
             this.SetAnimation_('Jump');
           }
           break;
-        case 'KeyL':
+        case 'KeyC': // C key
           if (
             !this.isJumping_ &&
             !this.isRolling_ &&
@@ -283,9 +283,11 @@ export const player = (() => {
       loader.load(`${characterName}.gltf`, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(1);
-        model.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+        model.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI); // 180도 회전
         this.mesh_ = model;
         this.params_.scene.add(model);
+
+        
 
         model.traverse((c) => {
           if (c.isMesh) {
@@ -745,14 +747,8 @@ export const player = (() => {
       if (this.keys_.right) velocity.add(right);
       velocity.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationAngle);
 
-      // 회전 업데이트 (충돌과 무관하게 항상 처리)
-      if (velocity.length() > 0.01) {
-        const angle = Math.atan2(velocity.x, velocity.z);
-        const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0), angle
-        );
-        this.mesh_.quaternion.slerp(targetQuaternion, 0.3);
-      }
+      // 플레이어의 Y축 회전을 카메라의 Y축 회전과 동기화
+      this.mesh_.rotation.y = -rotationAngle;
 
       if (this.isRolling_) {
         this.rollTimer_ -= timeElapsed;

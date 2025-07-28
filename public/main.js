@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js';
+
+
 import { player } from './player.js';
 import { object } from './object.js';
 import { math } from './math.js';
@@ -39,8 +40,6 @@ export class GameStage1 {
     const near = 1.0;
     const far = 2000.0;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.camera.position.set(-8, 6, 12);
-    this.camera.lookAt(0, 2, 0);
 
     this.scene = new THREE.Scene();
 
@@ -66,6 +65,10 @@ export class GameStage1 {
     window.addEventListener('resize', () => this.OnWindowResize(), false);
     document.addEventListener('keydown', (e) => this._OnKeyDown(e), false);
     document.addEventListener('keyup', (e) => this._OnKeyUp(e), false);
+    document.addEventListener('mousemove', (e) => this._OnMouseMove(e), false);
+    document.addEventListener('mousedown', (e) => this._OnMouseDown(e), false);
+    document.addEventListener('mouseup', (e) => this._OnMouseUp(e), false);
+    document.addEventListener('contextmenu', (e) => this._OnContextMenu(e), false);
   }
 
   SetupLighting() {
@@ -220,8 +223,10 @@ export class GameStage1 {
       }
     });
 
-    this.cameraTargetOffset = new THREE.Vector3(0, 15, 10);
-    this.rotationAngle = 4.715;
+    this.cameraYaw = 0;
+    this.cameraPitch = 0;
+    this.isMouseDown = false;
+    this.previousMousePosition = { x: 0, y: 0 };
   }
 
   OnWindowResize() {
@@ -233,15 +238,71 @@ export class GameStage1 {
   UpdateCamera() {
     if (!this.player_ || !this.player_.mesh_) return;
 
-    const target = this.player_.mesh_.position.clone();
-    const offset = this.cameraTargetOffset.clone();
-    offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.rotationAngle);
-    const cameraPos = target.clone().add(offset);
-    this.camera.position.copy(cameraPos);
+    const playerPosition = this.player_.mesh_.position;
+    let cameraOffset = new THREE.Vector3(0, 2.2, 0); // 플레이어 눈높이보다 살짝 위로
 
-    const headOffset = new THREE.Vector3(0, 2, 0);
-    const headPosition = target.clone().add(headOffset);
-    this.camera.lookAt(headPosition);
+    this.camera.position.copy(playerPosition).add(cameraOffset);
+
+    // 구르기 중 카메라 시점 조정
+    if (this.player_.isRolling_) {
+      const rollProgress = 1 - (this.player_.rollTimer_ / this.player_.rollDuration_);
+      const maxRollCameraOffset = 2.0; // 카메라가 뒤로 빠지는 최대 거리 (조절 가능)
+      const currentRollOffset = Math.sin(rollProgress * Math.PI) * maxRollCameraOffset;
+
+      const cameraForward = new THREE.Vector3();
+      this.camera.getWorldDirection(cameraForward); // 카메라의 현재 전방 벡터를 가져옴
+
+      const rollCameraPositionOffset = cameraForward.multiplyScalar(currentRollOffset);
+      this.camera.position.add(rollCameraPositionOffset);
+    }
+
+    // 마우스 회전 적용
+    const quaternion = new THREE.Quaternion();
+    quaternion.setFromEuler(new THREE.Euler(this.cameraPitch, this.cameraYaw, 0, 'YXZ'));
+    this.camera.rotation.setFromQuaternion(quaternion);
+  }
+
+  _OnMouseMove(event) {
+    if (document.pointerLockElement !== document.body) return; // 마우스 포인터가 잠겨있지 않으면 리턴
+
+    const deltaX = event.movementX;
+    const deltaY = event.movementY;
+
+    this.cameraYaw -= deltaX * 0.002; // 마우스 좌우 움직임으로 Y축 회전
+    this.cameraPitch -= deltaY * 0.002; // 마우스 상하 움직임으로 X축 회전
+
+    // 카메라 상하 회전 제한 (고개를 너무 위아래로 꺾는 것 방지)
+    this.cameraPitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraPitch));
+  }
+
+  _OnMouseDown(event) {
+    if (event.button === 0) { // Left mouse button
+      document.body.requestPointerLock(); // 마우스 포인터 잠금
+
+      if (this.player_ && this.player_.mesh_) {
+        let attackAnimation = 'SwordSlash'; // 기본값
+        // 무기 종류에 따라 애니메이션 선택
+        if (this.player_.currentWeaponModel && this.player_.currentWeaponModel.userData.weaponName) {
+          const weaponName = this.player_.currentWeaponModel.userData.weaponName;
+          if (/Pistol|Shotgun|SniperRifle|AssaultRifle|Bow/i.test(weaponName)) {
+            attackAnimation = 'Shoot_OneHanded';
+          } else if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
+            attackAnimation = 'SwordSlash';
+          }
+        }
+        this.player_.PlayAttackAnimation(attackAnimation);
+        this.socket.emit('playerAttack', attackAnimation); // 서버에 공격 애니메이션 정보 전송
+      }
+    }
+  }
+
+  _OnMouseUp(event) {
+    if (event.button === 0) { // Left mouse button
+    }
+  }
+
+  _OnContextMenu(event) {
+    event.preventDefault(); // 우클릭 메뉴 방지
   }
 
   SetupSocketEvents() {
@@ -418,22 +479,6 @@ export class GameStage1 {
           }
         }
         break;
-      case 74: // J key
-        if (this.player_ && this.player_.mesh_) {
-          let attackAnimation = 'SwordSlash'; // 기본값
-          // 무기 종류에 따라 애니메이션 선택
-          if (this.player_.currentWeaponModel && this.player_.currentWeaponModel.userData.weaponName) {
-            const weaponName = this.player_.currentWeaponModel.userData.weaponName;
-            if (/Pistol|Shotgun|SniperRifle|AssaultRifle|Bow/i.test(weaponName)) {
-              attackAnimation = 'Shoot_OneHanded';
-            } else if (/Sword|Axe|Dagger|Hammer/i.test(weaponName)) {
-              attackAnimation = 'SwordSlash';
-            }
-          }
-          this.player_.PlayAttackAnimation(attackAnimation);
-          this.socket.emit('playerAttack', attackAnimation); // 서버에 공격 애니메이션 정보 전송
-        }
-        break;
     }
   }
 
@@ -452,7 +497,7 @@ export class GameStage1 {
     this.prevTime = time || performance.now();
 
     if (this.player_ && this.player_.mesh_) {
-      this.player_.Update(delta, this.rotationAngle, this.npc_.GetCollidables());
+      this.player_.Update(delta, this.cameraYaw, this.npc_.GetCollidables());
       this.UpdateCamera();
 
       // Send player position to server
@@ -841,11 +886,11 @@ socket.on('killFeed', (data) => {
     killMessage.style.marginBottom = '5px';
 
     killMessage.innerHTML = `
-        <img src="./resources/character/${data.attackerCharacter}.png" alt="${data.attackerName}" style="width: 20px; height: 20px; margin-right: 5px; border-radius: 50%;">
-        <span>${data.attackerName}</span>
-        <span style="margin: 0 5px;">killed</span>
-        <img src="./resources/character/${data.victimCharacter}.png" alt="${data.victimName}" style="width: 20px; height: 20px; margin-right: 5px; border-radius: 50%;">
-        <span>${data.victimName}</span>
+        <img src="./resources/character/${data.attackerCharacter}.png" alt="${data.attackerName}" style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
+        <span style="font-size: 22px;">${data.attackerName}</span>
+        <img src="./resources/knife_icon.png" alt="killed" style="width: 40px; height: 40px; margin: 0 10px;">
+        <img src="./resources/character/${data.victimCharacter}.png" alt="${data.victimName}" style="width: 40px; height: 40px; margin-right: 10px; border-radius: 50%;">
+        <span style="font-size: 22px;">${data.victimName}</span>
     `;
 
     killFeed.appendChild(killMessage);
