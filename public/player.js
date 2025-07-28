@@ -375,6 +375,16 @@ export const player = (() => {
           this.currentAction_.clampWhenFinished = true;
           this.currentAction_.time = 0.0;
           this.currentAction_.timeScale = 1.2;
+        } else if (name === 'Pickup') {
+          this.currentAction_.setLoop(THREE.LoopOnce);
+          this.currentAction_.clampWhenFinished = true;
+          this.currentAction_.time = 0.0;
+          this.currentAction_.timeScale = 1.0;
+          this.mixer_.addEventListener('finished', (e) => {
+            if (e.action === this.currentAction_) {
+              this.SetAnimation_('Idle');
+            }
+          });
         } else if (name === 'Death') {
           this.currentAction_.setLoop(THREE.LoopOnce);
           this.currentAction_.clampWhenFinished = true;
