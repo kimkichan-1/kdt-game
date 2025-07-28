@@ -12,6 +12,7 @@ export const player = (() => {
       this.params_ = params;
       this.nickname_ = params.nickname; // 닉네임 추가
       this.socket_ = params.socket; // socket 인스턴스 추가
+      this.camera_ = params.camera; // camera 인스턴스 추가
       this.mesh_ = null;
       this.mixer_ = null;
       this.animations_ = {};
@@ -565,9 +566,13 @@ export const player = (() => {
                 }
               });
             } else if (weapon.type === 'ranged') {
+              // 카메라의 현재 시야 방향을 발사 방향으로 사용
+              const cameraDirection = new THREE.Vector3();
+              this.camera_.getWorldDirection(cameraDirection);
+
               this.attackSystem_.spawnMeleeProjectile({
                 position: attackPosition,
-                direction: attackDirection,
+                direction: cameraDirection, // 카메라 방향 사용
                 weapon: weapon,
                 attacker: attacker,
                 type: 'circle',

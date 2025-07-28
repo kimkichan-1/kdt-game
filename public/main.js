@@ -217,6 +217,7 @@ export class GameStage1 {
       getRespawnPosition: () => this.getRandomPosition(),
       attackSystem: this.attackSystem, // AttackSystem 인스턴스 전달
       socket: this.socket, // socket 인스턴스 전달
+      camera: this.camera, // camera 인스턴스 전달
       onLoad: () => {
         const initialPosition = this.getRandomPosition();
         this.player_.SetPosition([initialPosition.x, initialPosition.y, initialPosition.z]);
